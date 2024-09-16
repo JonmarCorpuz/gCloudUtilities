@@ -9,7 +9,7 @@
    \ \_______\ \__\\ _\\ \_______\ \__\ \__\   \ \__\ \ \_______\ \__/ /     \ \__\    \ \_______\
     \|_______|\|__|\|__|\|_______|\|__|\|__|    \|__|  \|_______|\|__|/       \|__|     \|_______|
 ```
-is an interactive script written by Jonmar Corpuz to help GCP customers easily create and launch a basic load balanced VPC 
+An interactive script written by Jonmar Corpuz to help GCP customers easily create and launch a basic load balanced VPC 
 comprised of a MIG within a private subnet.
 
 # To Do
