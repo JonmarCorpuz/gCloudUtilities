@@ -1,5 +1,16 @@
+# About CreateVPC
+ ________  ________  _______   ________  _________  _______   ___      ___ ________  ________
+|\   ____\|\   __  \|\  ___ \ |\   __  \|\___   ___\\  ___ \ |\  \    /  /|\   __  \|\   ____\
+\ \  \___|\ \  \|\  \ \   __/|\ \  \|\  \|___ \  \_\ \   __/|\ \  \  /  / | \  \|\  \ \  \___|
+ \ \  \    \ \   _  _\ \  \_|/_\ \   __  \   \ \  \ \ \  \_|/_\ \  \/  / / \ \   ____\ \  \
+  \ \  \____\ \  \\  \\ \  \_|\ \ \  \ \  \   \ \  \ \ \  \_|\ \ \    / /   \ \  \___|\ \  \____
+   \ \_______\ \__\\ _\\ \_______\ \__\ \__\   \ \__\ \ \_______\ \__/ /     \ \__\    \ \_______\
+    \|_______|\|__|\|__|\|_______|\|__|\|__|    \|__|  \|_______|\|__|/       \|__|     \|_______|
 
-TO DO:
+is an interactive script written by Jonmar Corpuz to help GCP customers easily create and launch a basic load balanced VPC 
+comprised of a MIG within a private subnet.
+
+# To Do
 
 - [X] Configure MIG autoscaling
 - [ ] Configure MIG health checks 
