@@ -14,7 +14,15 @@ comprised of a MIG within a private subnet.
 
 * Current version: 1.0
 
-# To Do
+# Infrastructure Components
+
+The created GCP infrastructure includes the following:
+
+* A global instance template
+* A regional managed instance group
+* An external application load balancer
+
+# Upcoming Features
 
 - [X] Configure MIG autoscaling
 - [ ] Configure MIG health checks 
