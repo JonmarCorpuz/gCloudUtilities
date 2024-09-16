@@ -12,6 +12,8 @@
 An interactive script written by Jonmar Corpuz to help GCP customers easily create and launch a basic load balanced VPC 
 comprised of a MIG within a private subnet.
 
+* Current version: 1.0
+
 # To Do
 
 - [X] Configure MIG autoscaling
