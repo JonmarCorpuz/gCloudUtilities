@@ -1,3 +1,6 @@
+# INTERNAL NOTES
+# Adjust the MIG health check to do a health check using private subnet
+
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
@@ -150,9 +153,8 @@ gcloud compute instance-templates create $InstanceTemplateName \
     --image-project $InstanceTemplateImageProject \
     --metadata-from-file=startup-script=StartupScript.sh \
     --tags $2-http-health-check,$2-http-public-access,$2-vpc-allow \
-    --network $2-vpc \
-    --subnet $2-vpc-subnet \
-    --region $NetworkRegion
+    --region $NetworkRegion \
+    --network-interface no-address,network=$2-vpc,subnet="$2-vpc-subnet"
 
 echo ""
 echo -e "${GREEN}[SUCCESS]${WHITE} The instance template was created successfully."
