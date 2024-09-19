@@ -25,7 +25,8 @@ The created GCP infrastructure includes the following:
 # Upcoming Features
 
 - [X] Configure MIG autoscaling
-- [ ] Configure MIG health checks 
+- [X] Configure MIG health checks 
 - [ ] Give the option to specify specific zones
+- [ ] Remove public IP addresses from VM instances
 - [ ] Output a script that the user can use to recreate the same infrastructure that he created with the script without being asked to re-enter the same information again
 - [ ] Convert the outputted script into a Terraform configuration file
