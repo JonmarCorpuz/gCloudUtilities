@@ -81,7 +81,6 @@ gcloud compute networks create "${2}-vpc" \
 gcloud compute networks subnets create "${2}-vpc-subnet" \
     --network $2-vpc \
     --region $NetworkRegion \
-    --purpose PRIVATE \
     --range 10.10.0.0/24 
 
 ######################################### FIREWALL RULES ########################################
@@ -95,7 +94,7 @@ else
         --network $2-vpc \
         --allow tcp,udp,icmp \
         --direction ingress \
-        --source-ranges 0.0.0.0/0 \
+        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
         --target-tags $2-vpc-allow \
 #        --rules tcp:80
 fi 
@@ -109,7 +108,7 @@ else
         --network $2-vpc \
         --allow tcp,udp,icmp \
         --direction egress \
-        --source-ranges 0.0.0.0/0 \
+        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
         --target-tags $2-vpc-allow \
 #        --rules tcp:80
 fi 
@@ -122,7 +121,7 @@ else
     gcloud compute firewall-rules create ${2}-http-health-check \
         --action allow \
         --direction ingress \
-        --source-ranges 0.0.0.0/0 \
+        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
         --target-tags $2-http-health-check \
         --network $2-vpc \
         --rules tcp:80
@@ -136,9 +135,9 @@ else
     gcloud compute firewall-rules create ${2}-http-public-access \
         --action allow \
         --direction egress \
-        --source-ranges 0.0.0.0/0 \
+        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
         --target-tags $2-http-public-access \
-        --network $2-vpc \ 
+        --network $2-vpc \
         --rules tcp:80
 fi 
 
@@ -150,7 +149,7 @@ else
     gcloud compute firewall-rules create ${2}-lb-health-check \
         --action allow \
         --direction ingress \
-        --source-ranges 0.0.0.0/0 \
+        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
         --target-tags $2-lb-health-check \
         --network $2-vpc \
         --rules tcp:80
@@ -184,7 +183,7 @@ gcloud compute instance-templates create $InstanceTemplateName \
     --metadata-from-file=startup-script=StartupScript.sh \
     --tags $2-http-health-check,$2-http-public-access,$2-vpc-allow,${2}-vpc-allow-test \
     --region $NetworkRegion \
-    --network-interface no-address,network=$2-vpc,subnet="$2-vpc-subnet"
+    --network-interface network=$2-vpc,subnet="$2-vpc-subnet" #,no-address
 
 echo ""
 echo -e "${GREEN}[SUCCESS]${WHITE} The instance template was created successfully."
@@ -214,12 +213,14 @@ if gcloud compute health-checks describe http-mig-health-check;
 then
     echo "" && echo -e "A health check named http-health-check already exists in your project." && echo ""
 else
-    gcloud compute health-checks create http http-mig-health-check --port 80 \
+    gcloud compute health-checks create http http-mig-health-check \
+        --port 80 \
         --check-interval 30s \
         --healthy-threshold 1 \
         --timeout 10s \
         --unhealthy-threshold 3 \
-        --global
+        --global \
+        --port-name HTTP 
 fi 
 
 echo ""
@@ -254,19 +255,21 @@ echo ""
 
 ######################################### LOAD BALANCER #########################################
 
+#
+gcloud compute health-checks create http $2-http-lb-health-check \
+     --port 80 \
+
 # Reserve an External IP Address
 gcloud compute addresses create $2-lb-address \
     --ip-version=IPV4 \
     --global
-#    --network-tier=PREMIUM \
-
 
 # Create Backend Service
 gcloud compute backend-services create $2-lb-backend-service \
     --load-balancing-scheme EXTERNAL \
     --protocol HTTP \
     --port-name http \
-    --health-checks $2-lb-health-check \
+    --health-checks $2-http-lb-health-check \
     --global
 
 gcloud beta compute backend-services add-backend $2-lb-backend-service \
@@ -278,7 +281,7 @@ gcloud beta compute url-maps create web-map-http \
   --default-service $2-lb-backend-service
 
 gcloud compute target-http-proxies create http-lb-proxy \
-  --url-map web-map-http
+  --url-map web-map-http \
 
 gcloud compute forwarding-rules create http-content-rule \
   --load-balancing-scheme EXTERNAL \
