@@ -64,7 +64,7 @@ fi
 #
 #read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name that would you like to give your virtual private network:) " InstanceTemplateName
 
-#
+# 
 if gcloud compute networks describe "${2}-vpc" &> /dev/null ; 
 then
     echo "" && echo -e "A Virtual Private Network called ${PrivateNetworkName} already exists in your project." && echo ""
@@ -73,17 +73,32 @@ fi
 #
 read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the region where you want your virtual private network to reside in:) " NetworkRegion
 
-#
+# Create VPC network
 gcloud compute networks create "${2}-vpc" \
     --subnet-mode custom 
 
-# 
+# Create VPC private subnet
 gcloud compute networks subnets create "${2}-vpc-subnet" \
     --network $2-vpc \
     --region $NetworkRegion \
     --range 10.10.0.0/24 
 
+# Create VPC proxy only subnet
+gcloud compute networks subnets create "${2}-proxy-subnet" \
+    --network $2-vpc \
+    --region $NetworkRegion \
+    --range 10.10.1.0/24  \
+    --role active \
+    --purpose REGIONAL_MANAGED_PROXY
+
 ######################################### FIREWALL RULES ########################################
+
+# Reserve a public IP address for the load balancer
+gcloud compute addresses create $2-lb-address \
+    --ip-version=IPV4 \
+    --global
+
+lb_address=$(gcloud compute addresses describe $2-lb-address --format="get(address)" --global)
 
 #
 if gcloud compute firewall-rules describe "${2}-vpc-allow"; 
@@ -94,9 +109,8 @@ else
         --network $2-vpc \
         --allow tcp,udp,icmp \
         --direction ingress \
-        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
-        --target-tags $2-vpc-allow \
-#        --rules tcp:80
+        --source-ranges 130.211.0.0/22,35.191.0.0/16,$lb_address \
+        --target-tags $2-vpc-allow 
 fi 
 
 #
@@ -109,8 +123,7 @@ else
         --allow tcp,udp,icmp \
         --direction egress \
         --source-ranges 130.211.0.0/22,35.191.0.0/16 \
-        --target-tags $2-vpc-allow \
-#        --rules tcp:80
+        --target-tags $2-vpc-allow 
 fi 
 
 #
@@ -155,6 +168,23 @@ else
         --rules tcp:80
 fi 
 
+#
+gcloud compute firewall-rules create test-fw-allow-health-check \
+    --network $2-vpc \
+    --action=allow \
+    --direction=ingress \
+    --source-ranges=130.211.0.0/22,35.191.0.0/16 \
+    --target-tags=load-balanced-backend \
+    --rules=tcp
+#
+gcloud compute firewall-rules create test-fw-allow-proxies \
+    --network $2-vpc \
+    --action=allow \
+    --direction=ingress \
+    --source-ranges 10.10.1.0/24 \
+    --target-tags=load-balanced-backend \
+    --rules=tcp:80,tcp:443,tcp:8080
+
 ####################################### INSTANCE TEMPLATE #######################################
 
 echo ""
@@ -181,7 +211,7 @@ gcloud compute instance-templates create $InstanceTemplateName \
     --image-family $InstanceTemplateImageFamily \
     --image-project $InstanceTemplateImageProject \
     --metadata-from-file=startup-script=StartupScript.sh \
-    --tags $2-http-health-check,$2-http-public-access,$2-vpc-allow,${2}-vpc-allow-test \
+    --tags $2-http-health-check,$2-http-public-access,$2-vpc-allow,${2}-vpc-allow-test,load-balanced-backend \
     --region $NetworkRegion \
     --network-interface network=$2-vpc,subnet="$2-vpc-subnet" #,no-address
 
@@ -259,11 +289,6 @@ echo ""
 gcloud compute health-checks create http $2-http-lb-health-check \
      --port 80 \
 
-# Reserve an External IP Address
-gcloud compute addresses create $2-lb-address \
-    --ip-version=IPV4 \
-    --global
-
 # Create Backend Service
 gcloud compute backend-services create $2-lb-backend-service \
     --load-balancing-scheme EXTERNAL \
@@ -273,22 +298,22 @@ gcloud compute backend-services create $2-lb-backend-service \
     --global
 
 gcloud beta compute backend-services add-backend $2-lb-backend-service \
-  --instance-group $InstanceGroupName \
-  --instance-group-region $NetworkRegion \
-  --global
+    --instance-group $InstanceGroupName \
+    --instance-group-region $NetworkRegion \
+    --global
 
 gcloud beta compute url-maps create web-map-http \
-  --default-service $2-lb-backend-service
+    --default-service $2-lb-backend-service
 
 gcloud compute target-http-proxies create http-lb-proxy \
-  --url-map web-map-http \
+    --url-map web-map-http \
 
 gcloud compute forwarding-rules create http-content-rule \
-  --load-balancing-scheme EXTERNAL \
-  --address $2-lb-address \
-  --global \
-  --target-http-proxy http-lb-proxy \
-  --ports 80
+    --load-balancing-scheme EXTERNAL \
+    --address $2-lb-address \
+    --global \
+    --target-http-proxy http-lb-proxy \
+    --ports 80
 
 ########################################## REFERENCES ###########################################
 
