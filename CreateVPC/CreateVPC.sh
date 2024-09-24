@@ -28,7 +28,7 @@ echo "" && echo -e "${YELLOW}[REQUIRED]${WHITE} Basic understanding of how GCP p
 
 ######################################## ARGUMENTS CHECK ########################################
 
-#
+# Check if the user executed the script correctly
 while getopts ":p:" opt; do
     case $opt in
         f) file="$OPTARG"
@@ -40,7 +40,7 @@ while getopts ":p:" opt; do
     esac
 done
 
-#
+# Check if the user provided only the required values when executing the script
 if [ $OPTIND -eq 1 ]; 
 then
     echo -e "${RED}[ERROR 3]${WHITE} Usage: ./CreateVPC.sh -p <PROJECT_ID>" && echo "" &&  exit 1
@@ -96,7 +96,7 @@ gcloud compute networks create $NetworkName \
 
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The virtual private network was created successfully." && echo ""
 
-# Create private subnet for the instances created from the instance group
+# Create a private subnet for the instances created from the instance group
 gcloud compute networks subnets create "${NetworkName}-private-subnet" \
     --network $NetworkName \
     --region $NetworkRegion \
@@ -104,7 +104,7 @@ gcloud compute networks subnets create "${NetworkName}-private-subnet" \
 
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The private subnet was created successfully within the virtual private network." && echo ""
 
-# Create proxy only subnet for the load balancer
+# Create a proxy only subnet for the load balancer
 gcloud compute networks subnets create "${NetworkName}-proxy-subnet" \
     --network $NetworkName \
     --region $NetworkRegion \
@@ -119,6 +119,7 @@ gcloud compute addresses create $NetworkName-lb-address \
     --ip-version=IPV4 \
     --global
 
+# Store the load balancer's public address
 lb_address=$(gcloud compute addresses describe $NetworkName-lb-address --format="get(address)" --global)
 
 ######################################### FIREWALL RULES ########################################
@@ -192,15 +193,16 @@ else
 fi 
 
 #
-gcloud compute firewall-rules create test-fw-allow-health-check \
+gcloud compute firewall-rules create ${NetworkName}-test-fw-allow-health-check \
     --network $NetworkName \
     --action=allow \
     --direction=ingress \
     --source-ranges=130.211.0.0/22,35.191.0.0/16 \
     --target-tags=load-balanced-backend \
     --rules=tcp
+
 #
-gcloud compute firewall-rules create test-fw-allow-proxies \
+gcloud compute firewall-rules create ${NetworkName}-test-fw-allow-proxies \
     --network $NetworkName \
     --action=allow \
     --direction=ingress \
@@ -211,8 +213,6 @@ gcloud compute firewall-rules create test-fw-allow-proxies \
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The firewall policies were created successfully." && echo ""
 
 ####################################### INSTANCE TEMPLATE #######################################
-
-echo ""
 
 #
 while [[ $ALWAYS_TRUE=true ]];
@@ -254,7 +254,7 @@ do
     fi
 done
 
-# Create Instance Template
+# Create an instance template
 gcloud compute instance-templates create $InstanceTemplateName \
     --machine-type $InstanceTemplateMachineType \
     --image-family $InstanceTemplateImageFamily \
@@ -285,7 +285,7 @@ do
     fi 
 done 
 
-# Prompt the user for the instance template for their instance group
+# Prompt the user for the instance template that their instance group will use
 while [[ $ALWAYS_TRUE=true ]];
 do 
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name of the instance template that you want your managed instance group to use:) " InstanceGroupTemplate
@@ -298,7 +298,7 @@ do
     fi 
 done
 
-# Prompt the user for the minimum number of instances in their instance group
+# Prompt the user for the minimum number of instances that'll run in their instance group
 while [[ $ALWAYS_TRUE=true ]];
 do 
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the minimum number of instances that you would want your managed instance group to run:) " InstanceGroupMinScaling
@@ -311,7 +311,7 @@ do
     fi
 done 
 
-# Prompt the user for the maximum number of instances for their instance group
+# Prompt the user for the maximum number of instances that'll run in their instance group
 while [[ $ALWAYS_TRUE=true ]];
 do 
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the maximum number of instances that you would want your managed instance group to scale up to:) " InstanceGroupMaxScaling
@@ -368,7 +368,7 @@ echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} Autoscaling was successfully confi
 
 #
 gcloud compute health-checks create http $NetworkName-http-lb-health-check \
-     --port 80 \
+     --port 80 
 
 # Create a backend service for the load-balancer
 gcloud compute backend-services create $NetworkName-lb-backend-service \
@@ -385,12 +385,12 @@ gcloud beta compute backend-services add-backend $NetworkName-lb-backend-service
     --global
 
 #
-gcloud beta compute url-maps create web-map-http \
+gcloud beta compute url-maps create $NetworkName-lb \
     --default-service $NetworkName-lb-backend-service
 
 #
 gcloud compute target-http-proxies create http-lb-proxy \
-    --url-map web-map-http \
+    --url-map $NetworkName-lb \
 
 #
 gcloud compute forwarding-rules create http-content-rule \
@@ -399,6 +399,8 @@ gcloud compute forwarding-rules create http-content-rule \
     --global \
     --target-http-proxy http-lb-proxy \
     --ports 80
+
+########################################## MONITORING ###########################################
 
 ########################################## REFERENCES ###########################################
 :'
