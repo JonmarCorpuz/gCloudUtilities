@@ -27,6 +27,9 @@ The created GCP infrastructure includes the following:
 - [X] Configure MIG autoscaling
 - [X] Configure MIG health checks 
 - [ ] Give the option to specify specific zones
+- [ ] Install Ops Agent on VM instances
+- [ ] Monitor VPC traffic
 - [ ] Remove public IP addresses from VM instances
 - [ ] Output a script that the user can use to recreate the same infrastructure that he created with the script without being asked to re-enter the same information again
 - [ ] Convert the outputted script into a Terraform configuration file
+- [ ] A function to delete the created resources if the script return an exit code 1
