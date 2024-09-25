@@ -1,3 +1,9 @@
+# INTERNAL NOTES:
+
+# Install Ops Agent on VM instances
+# Monitor VPC traffic
+# Option
+
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
@@ -125,90 +131,45 @@ lb_address=$(gcloud compute addresses describe $NetworkName-lb-address --format=
 ######################################### FIREWALL RULES ########################################
 
 #
-if gcloud compute firewall-rules describe "${NetworkName}-vpc-allow" &> /dev/null; 
+if gcloud compute firewall-rules describe "$NetworkName-vpc-traffic" &> /dev/null; 
 then
-    echo "" && echo -e "A Virtual Private Network called vpc-allow already exists in your project." && echo ""
+    echo "" && echo -e "${RED}[ERROR 15]${WHITE} A Virtual Private Network called ${NetworkName}-vpc-traffic already exists in your project." && echo ""
 else
-    gcloud compute firewall-rules create ${NetworkName}-vpc-allow \
+    gcloud compute firewall-rules create ${NetworkName}-vpc-traffic \
         --network $NetworkName \
         --allow tcp,udp,icmp \
         --direction ingress \
         --source-ranges 130.211.0.0/22,35.191.0.0/16,$lb_address \
-        --target-tags $NetworkName-vpc-allow 
+        --target-tags $NetworkName-vpc-traffic
 fi 
 
 #
-if gcloud compute firewall-rules describe "${NetworkName}-vpc-allow-test" &> /dev/null; 
+if gcloud compute firewall-rules describe "$NetworkName-fw-allow-health-check" &> /dev/null; 
 then
-    echo "" && echo -e "A Virtual Private Network called vpc-allow already exists in your project." && echo ""
+    echo "" && echo -e "${RED}[ERROR 16]${WHITE} A Virtual Private Network called ${NetworkName}-fw-allow-health-check already exists in your project." && echo ""
 else
-    gcloud compute firewall-rules create ${NetworkName}-vpc-allow-test \
+    gcloud compute firewall-rules create ${NetworkName}-fw-allow-health-check \
         --network $NetworkName \
-        --allow tcp,udp,icmp \
-        --direction egress \
-        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
-        --target-tags $NetworkName-vpc-allow 
-fi 
-
-#
-if gcloud compute firewall-rules describe "${NetworkName}-http-health-check" &> /dev/null; 
-then
-    echo "" && echo -e "A Virtual Private Network called http-health-check already exists in your project." && echo ""
-else
-    gcloud compute firewall-rules create ${NetworkName}-http-health-check \
         --action allow \
         --direction ingress \
         --source-ranges 130.211.0.0/22,35.191.0.0/16 \
-        --target-tags $NetworkName-http-health-check \
-        --network $NetworkName \
-        --rules tcp:80
-fi 
+        --target-tags $NetworkName-load-balanced-backend \
+        --rules tcp
+fi
 
 #
-if gcloud compute firewall-rules describe "${NetworkName}-http-public-access" &> /dev/null; 
+if gcloud compute firewall-rules describe "$NetworkName-fw-allow-proxies" &> /dev/null; 
 then
-    echo "" && echo -e "A Virtual Private Network called already http-public-access exists in your project." && echo ""
+    echo "" && echo -e "${RED}[ERROR 17]${WHITE} A Virtual Private Network called ${NetworkName}-fw-allow-proxies already exists in your project." && echo ""
 else
-    gcloud compute firewall-rules create ${NetworkName}-http-public-access \
-        --action allow \
-        --direction egress \
-        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
-        --target-tags $NetworkName-http-public-access \
+    gcloud compute firewall-rules create ${NetworkName}-fw-allow-proxies \
         --network $NetworkName \
-        --rules tcp:80
-fi 
-
-#
-if gcloud compute firewall-rules describe "${NetworkName}-lb-health-check" &> /dev/null; 
-then
-    echo "" && echo -e "A Virtual Private Network called lb-health-check already exists in your project." && echo ""
-else
-    gcloud compute firewall-rules create ${NetworkName}-lb-health-check \
         --action allow \
         --direction ingress \
-        --source-ranges 130.211.0.0/22,35.191.0.0/16 \
-        --target-tags $NetworkName-lb-health-check \
-        --network $NetworkName \
-        --rules tcp:80
-fi 
-
-#
-gcloud compute firewall-rules create ${NetworkName}-test-fw-allow-health-check \
-    --network $NetworkName \
-    --action=allow \
-    --direction=ingress \
-    --source-ranges=130.211.0.0/22,35.191.0.0/16 \
-    --target-tags=load-balanced-backend \
-    --rules=tcp
-
-#
-gcloud compute firewall-rules create ${NetworkName}-test-fw-allow-proxies \
-    --network $NetworkName \
-    --action=allow \
-    --direction=ingress \
-    --source-ranges 10.10.1.0/24 \
-    --target-tags=load-balanced-backend \
-    --rules=tcp:80,tcp:443,tcp:8080
+        --source-ranges 10.10.1.0/24 \
+        --target-tags $NetworkName-load-balanced-backend \
+        --rules tcp:80,tcp:443,tcp:8080
+fi
 
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The firewall policies were created successfully." && echo ""
 
@@ -234,9 +195,9 @@ do
 
     if gcloud compute machine-types describe $InstanceTemplateMachineType --zone us-east1-b &> /dev/null; 
     then
-        echo "" && echo -e "${RED}[ERROR 11]${WHITE} ${InstanceTemplateMachineType} isn't a valid machine type." && echo ""
+        break
     else
-        break 
+        echo "" && echo -e "${RED}[ERROR 11]${WHITE} ${InstanceTemplateMachineType} isn't a valid machine type." && echo "" 
     fi
 done 
 
@@ -248,9 +209,9 @@ do
     
     if gcloud compute images describe-from-family $InstanceTemplateImageFamily --project $InstanceTemplateImageProject &> /dev/null; 
     then
-        echo "" && echo -e "${RED}[ERROR 12]${WHITE} Couldn't find the ${InstanceTemplateImageFamily} image within the ${InstanceTemplateImageProject} project." && echo ""
+        break
     else
-        break 
+        echo "" && echo -e "${RED}[ERROR 12]${WHITE} Couldn't find the ${InstanceTemplateImageFamily} image within the ${InstanceTemplateImageProject} project." && echo "" 
     fi
 done
 
@@ -260,9 +221,9 @@ gcloud compute instance-templates create $InstanceTemplateName \
     --image-family $InstanceTemplateImageFamily \
     --image-project $InstanceTemplateImageProject \
     --metadata-from-file=startup-script=StartupScript.sh \
-    --tags $NetworkName-http-health-check,$NetworkName-http-public-access,$NetworkName-vpc-allow,${NetworkName}-vpc-allow-test,load-balanced-backend \
+    --tags $NetworkName-load-balanced-backend,$NetworkName-vpc-traffic  \
     --region $NetworkRegion \
-    --network-interface network=$NetworkName,subnet="${NetworkName}-private-subnet" #,no-address
+    --network-interface network=$NetworkName,subnet="${NetworkName}-private-subnet" # ,no-address
 
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The instance template was created successfully." && echo ""
 
@@ -290,7 +251,7 @@ while [[ $ALWAYS_TRUE=true ]];
 do 
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name of the instance template that you want your managed instance group to use:) " InstanceGroupTemplate
 
-    if gcloud compute instance-templates describe InstanceGroupTemplate &> /dev/null;
+    if gcloud compute instance-templates describe $InstanceGroupTemplate &> /dev/null;
     then
         break
     else 
@@ -339,7 +300,6 @@ else
         --port-name HTTP 
 
     echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} A health check was successfully created and configured for your managed instance group." && echo ""
-
 fi 
 
 # Create Instance Managed Group
@@ -402,36 +362,33 @@ gcloud compute forwarding-rules create http-content-rule \
 
 ########################################## MONITORING ###########################################
 
+####################################### DELETE RESOURCES ########################################
+
 ########################################## REFERENCES ###########################################
-:'
 
-Instance Template                   
-- https://cloud.google.com/compute/docs/instance-templates/create-instance-templates#gcloud
+# Instance Template                   
+# - https://cloud.google.com/compute/docs/instance-templates/create-instance-templates#gcloud
 
-Managed Instance Group              
-- https://cloud.google.com/compute/docs/instance-groups/create-zonal-mig#gcloud
+# Managed Instance Group              
+# - https://cloud.google.com/compute/docs/instance-groups/create-zonal-mig#gcloud
 
-Managed Instance Group Autoscaling  
-- https://cloud.google.com/compute/docs/instance-groups/create-mig-with-basic-autoscaling
+# Managed Instance Group Autoscaling  
+# - https://cloud.google.com/compute/docs/instance-groups/create-mig-with-basic-autoscaling
 
-Managed Instance Group Health Check 
-- https://cloud.google.com/compute/docs/instance-groups/autohealing-instances-in-migs
+# Managed Instance Group Health Check 
+# - https://cloud.google.com/compute/docs/instance-groups/autohealing-instances-in-migs
 
-Compute Networks
-- https://cloud.google.com/sdk/gcloud/reference/compute/networks/create
+# Compute Networks
+# - https://cloud.google.com/sdk/gcloud/reference/compute/networks/create
 
-Application Load Balancer           
-- https://cloud.google.com/load-balancing/docs/application-load-balancer
-- https://cloud.google.com/iap/docs/load-balancer-howto#gcloud
+# Application Load Balancer           
+# - https://cloud.google.com/load-balancing/docs/application-load-balancer
+# - https://cloud.google.com/iap/docs/load-balancer-howto#gcloud
 
-Backend                            
-- https://cloud.google.com/sdk/gcloud/reference/compute/backend-services/create
+# Backend                            
+# - https://cloud.google.com/sdk/gcloud/reference/compute/backend-services/create
 
-'
 ######################################## INTERNAL NOTES #########################################
-:'
 
-- Adjust the MIG health check to do a health check using private subnet
-- Health checks only work on external IP addresses?
-
-'
+# - Adjust the MIG health check to do a health check using private subnet
+# - Health checks only work on external IP addresses?
