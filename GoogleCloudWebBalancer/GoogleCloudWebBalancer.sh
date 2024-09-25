@@ -18,28 +18,21 @@ ALWAYS_TRUE=true
 ######################################### REQUIREMENTS ##########################################
 
 echo '''
- .88888.                             dP           a88888b. dP                         dP           
-d8'   `88                            88          d8'   `88 88                         88           
-88        .d8888b. .d8888b. .d8888b. 88 .d8888b. 88        88 .d8888b. dP    dP .d888b88           
-88   YP88 88'  `88 88'  `88 88'  `88 88 88ooood8 88        88 88'  `88 88    88 88'  `88           
-Y8.   .88 88.  .88 88.  .88 88.  .88 88 88.  ... Y8.   .88 88 88.  .88 88.  .88 88.  .88           
- `88888'  `88888P' `88888P' `8888P88 dP `88888P'  Y88888P' dP `88888P' `88888P' `88888P8           
-                                 .88                                                               
-                             d8888P                                                                
-dP   dP   dP          dP        888888ba           dP                                              
-88   88   88          88        88    `8b          88                                              
-88  .8P  .8P .d8888b. 88d888b. a88aaaa8P' .d8888b. 88 .d8888b. 88d888b. .d8888b. .d8888b. 88d888b. 
-88  d8'  d8' 88ooood8 88'  `88  88   `8b. 88'  `88 88 88'  `88 88'  `88 88'  `"" 88ooood8 88'  `88 
-88.d8P8.d8P  88.  ... 88.  .88  88    .88 88.  .88 88 88.  .88 88    88 88.  ... 88.  ... 88       
-8888' Y88'   `88888P' 88Y8888'  88888888P `88888P8 dP `88888P8 dP    dP `88888P' `88888P' dP       
-                                                                                                   
-                                                                                                   
+ ________  ________  ___       ________  ___  ___  ________  ___       __   ________     
+|\   ____\|\   ____\|\  \     |\   __  \|\  \|\  \|\   ___ \|\  \     |\  \|\   __  \    
+\ \  \___|\ \  \___|\ \  \    \ \  \|\  \ \  \\\  \ \  \_|\ \ \  \    \ \  \ \  \|\ /_   
+ \ \  \  __\ \  \    \ \  \    \ \  \\\  \ \  \\\  \ \  \ \\ \ \  \  __\ \  \ \   __  \  
+  \ \  \|\  \ \  \____\ \  \____\ \  \\\  \ \  \\\  \ \  \_\\ \ \  \|\__\_\  \ \  \|\  \ 
+   \ \_______\ \_______\ \_______\ \_______\ \_______\ \_______\ \____________\ \_______\
+    \|_______|\|_______|\|_______|\|_______|\|_______|\|_______|\|____________|\|_______|
+                                                                                                                                                                                        
+gCloud Web Balancer is an interactive script written by Jonmar Corpuz to help GCP customers easily 
+create and launch a redundant web application using a simple network architecture.
 
-An interactive script written by Jonmar Corpuz to help GCP customers easily create and launch a basic load balanced VPC 
-comprised of a MIG within a private subnet.
 '''
 
-echo "" && echo -e "${YELLOW}[REQUIRED]${WHITE} Basic understanding of how GCP products work and the resources needed to create certain resources." && echo ""
+echo -e "${YELLOW}[DISCLAIMER]${WHITE} This script was created for testing purposes and should be used in a production environment." && echo "" 
+echo -e "${YELLOW}[REQUIRED]${WHITE} Basic understanding of how GCP products work and the resources needed to create certain resources." && echo ""
 
 ######################################## ARGUMENTS CHECK ########################################
 
