@@ -43,9 +43,16 @@ done
 
 # Define a service to monitor all VM instances using labels
 
+List all VM instances (Store output in a file maybe)
+
+Add label for monitoring if it does not exist already (Prompt the user for a label name)
+
 # Define a service to monitor all containers using labels
 
 ########################################## REFERENCES ###########################################
+
+# Resource Labels
+# - https://cloud.google.com/compute/docs/labeling-resources#gcloud_1
 
 # Metrics Scope 
 # - https://cloud.google.com/monitoring/settings/manage-api
