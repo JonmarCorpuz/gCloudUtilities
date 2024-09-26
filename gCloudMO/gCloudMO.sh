@@ -32,20 +32,20 @@ done
 # Switch to the dedicated project for monitoring
 
 # Enable Cloud Monitoring API
-gcloud services enable monitoring --project=PROJECT_ID
+gcloud services enable monitoring --project=<PROJECT_ID_ENVIRONMENTAL_VARIABLE>
 
 # Add the specified projects to the metric scope
 
-for n of specified projects
-do
-  gcloud beta monitoring metrics-scopes create proejcts/<PROJECT ID OF THE PROJECT TO ADD> --project=<MONITORING PROEJCT ID>
-done
+#for n of specified projects
+#do
+  #gcloud beta monitoring metrics-scopes create proejcts/<PROJECT ID OF THE PROJECT TO ADD> --project=<MONITORING PROEJCT ID>
+#done
 
 # Define a service to monitor all VM instances using labels
 
-List all VM instances (Store output in a file maybe)
+#1.List all VM instances (Store output in a file maybe)
 
-Add label for monitoring if it does not exist already (Prompt the user for a label name)
+#2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
 
 # Define a service to monitor all containers using labels
 
