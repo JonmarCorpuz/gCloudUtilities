@@ -1,9 +1,3 @@
-# INTERNAL NOTES:
-
-# Install Ops Agent on VM instances
-# Monitor VPC traffic
-# Option
-
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
