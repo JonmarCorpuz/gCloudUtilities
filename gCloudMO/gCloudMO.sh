@@ -26,10 +26,15 @@ while getopts ":f:" opt; do
 done
 
 # Verify that the projects in the provided file all exist
+#for 
+#do
+
+#done
 
 ########################################## MONITORING ###########################################
 
 # Switch to the dedicated project for monitoring
+gcloud config set project <PROJECT_ID>
 
 # Enable Cloud Monitoring API
 gcloud services enable monitoring --project=<PROJECT_ID_ENVIRONMENTAL_VARIABLE>
