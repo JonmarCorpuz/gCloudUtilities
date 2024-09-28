@@ -26,25 +26,32 @@ while getopts ":f:" opt; do
 done
 
 # Verify that the projects in the provided file all exist
-#for 
-#do
+while read -r ProjectID ; do
 
-#done
+    if ! gcloud projects describe $ProjectID &> /dev/null;
+    then
+        echo "" && echo -e "${RED}[ERROR 1]${WHITE} ${ProjectID} dosen't exist." && echo "" && exit 1
+    fi
+    
+done < $2
+
+MainProject=$(head -n 1 $2)
 
 ########################################## MONITORING ###########################################
 
 # Switch to the dedicated project for monitoring
-gcloud config set project <PROJECT_ID>
+gcloud config set project $MainProject
 
 # Enable Cloud Monitoring API
-gcloud services enable monitoring --project=<PROJECT_ID_ENVIRONMENTAL_VARIABLE>
+gcloud services enable monitoring --project=$MainProject
 
 # Add the specified projects to the metric scope
 
-#for n of specified projects
-#do
-  #gcloud beta monitoring metrics-scopes create proejcts/<PROJECT ID OF THE PROJECT TO ADD> --project=<MONITORING PROEJCT ID>
-#done
+while read -r ProjectID ; do
+
+    gcloud beta monitoring metrics-scopes create projects/$ProjectID --project=$MainProject
+
+done < $2
 
 # Define a service to monitor all VM instances using labels
 
