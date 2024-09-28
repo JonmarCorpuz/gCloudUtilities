@@ -14,7 +14,8 @@ ALWAYS_TRUE=true
 ######################################## ARGUMENTS CHECK ########################################
 
 # Check if the user executed the script correctly
-while getopts ":f:" opt; do
+while getopts ":f:" opt; 
+do
     case $opt in
         f) file="$OPTARG"
         ;;
@@ -26,7 +27,8 @@ while getopts ":f:" opt; do
 done
 
 # Verify that the projects in the provided file all exist
-while read -r ProjectID ; do
+while read -r ProjectID; 
+do
 
     if ! gcloud projects describe $ProjectID &> /dev/null;
     then
@@ -47,7 +49,8 @@ gcloud services enable monitoring --project=$MainProject
 
 # Add the specified projects to the metric scope
 
-while read -r ProjectID ; do
+while read -r ProjectID; 
+do
 
     gcloud beta monitoring metrics-scopes create projects/$ProjectID --project=$MainProject
 
