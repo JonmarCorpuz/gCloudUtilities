@@ -1,3 +1,9 @@
+# TO DO
+# Create log scope --> Add projects to log scope --> Add metrics
+# Ops Agent for Monitoring and Logging needs to be installed on VM instance
+# Create an uptime check
+# Create an alerting policy
+
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
@@ -19,12 +25,14 @@ do
     case $opt in
         f) file="$OPTARG"
         ;;
-        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./CreateVPC.sh -p <TEXT_FILE>$" && echo "" &&  exit 1
+        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./gCloudMO.sh -f <TEXT_FILE>" && echo "" &&  exit 1
         ;;
-        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./CreateVPC.sh -p <TEXT_FILE>." && echo "" && exit 1
+        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./gCloudMO.sh -f <TEXT_FILE>." && echo "" && exit 1
         ;;
     esac
 done
+
+echo && echo "DONE 1" && echo ""
 
 # Verify that the projects in the provided file all exist
 while read -r ProjectID; 
@@ -39,31 +47,57 @@ done < $2
 
 MainProject=$(head -n 1 $2)
 
+echo && echo "DONE 2" && echo ""
+
+echo $MainProject
+
 ########################################## MONITORING ###########################################
 
 # Switch to the dedicated project for monitoring
 gcloud config set project $MainProject
 
+echo && echo "DONE 3" && echo ""
+
 # Enable Cloud Monitoring API
-gcloud services enable monitoring --project=$MainProject
+#gcloud services enable monitoring --project=$MainProject
 
 while read -r ProjectID; 
 do
 
+    gcloud config set project $MainProject
+
+    echo $ProjectID
+
+    gcloud services enable monitoring --project=$ProjectID
+    gcloud services enable compute --project=$ProjectID 
+
+    echo && echo "DONE 4" && echo ""
+
     # Add the specified projects to the metric scope
     gcloud beta monitoring metrics-scopes create projects/$ProjectID --project=$MainProject
 
+    echo && echo "DONE 5" && echo ""
+
     #1.List all VM instances (Store output in a file maybe)
-    gcloud compute instances list --project $ProjectID > InstanceList.txt
+    #gcloud compute instances list --project $ProjectID > InstanceList2.txt
+
+    echo && echo "DONE 6" && echo ""
 
     while read -r InstanceName; 
     do
 
+        gcloud config set project $ProjectID
+
+        echo $InstanceName
+
         #2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
         gcloud compute instances update $InstanceName \
-        --update-labels component=monitoring
+        --update-labels component=monitoring \
+        --zone us-central1-c
 
-    done < InstanceList.txt
+        echo && echo "DONE 7" && echo ""
+
+    done < InstanceList2.txt
     
 done < $2
 
