@@ -47,18 +47,27 @@ gcloud config set project $MainProject
 # Enable Cloud Monitoring API
 gcloud services enable monitoring --project=$MainProject
 
-# Add the specified projects to the metric scope
-
 while read -r ProjectID; 
 do
 
+    # Add the specified projects to the metric scope
     gcloud beta monitoring metrics-scopes create projects/$ProjectID --project=$MainProject
 
+    #1.List all VM instances (Store output in a file maybe)
+    gcloud compute instances list --project $ProjectID > InstanceList.txt
+
+    while read -r InstanceName; 
+    do
+
+        #2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
+        gcloud compute instances update $InstanceName \
+        --update-labels component=monitoring
+
+    done < InstanceList.txt
+    
 done < $2
 
 # Define a service to monitor all VM instances using labels
-
-#1.List all VM instances (Store output in a file maybe)
 
 #2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
 
