@@ -31,3 +31,5 @@ gCloud Web Balancer is an interactive script written by Jonmar Corpuz to help GC
 - [ ] Convert the outputted script into a Terraform configuration file
 - [ ] A function to delete the created resources if the script return an exit code 1
 - [ ] Optionally provided resource monitoring using gCloudMO.sh
+- [ ] Add option --service-acount
+- [ ] Add option --create-disk
