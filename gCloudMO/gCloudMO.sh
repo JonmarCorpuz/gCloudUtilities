@@ -1,9 +1,3 @@
-# TO DO
-# Create log scope --> Add projects to log scope --> Add metrics
-# Ops Agent for Monitoring and Logging needs to be installed on VM instance
-# Create an uptime check
-# Create an alerting policy
-
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
@@ -16,6 +10,20 @@ GREEN="\033[0;32m"
 ALWAYS_TRUE=true
 
 ######################################### REQUIREMENTS ##########################################
+
+echo '''
+ ________  ________  ___       ________  ___  ___  ________  _____ ______   ________     
+|\   ____\|\   ____\|\  \     |\   __  \|\  \|\  \|\   ___ \|\   _ \  _   \|\   __  \    
+\ \  \___|\ \  \___|\ \  \    \ \  \|\  \ \  \\\  \ \  \_|\ \ \  \\\__\ \  \ \  \|\  \   
+ \ \  \  __\ \  \    \ \  \    \ \  \\\  \ \  \\\  \ \  \ \\ \ \  \\|__| \  \ \  \\\  \  
+  \ \  \|\  \ \  \____\ \  \____\ \  \\\  \ \  \\\  \ \  \_\\ \ \  \    \ \  \ \  \\\  \ 
+   \ \_______\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\    \ \__\ \_______\
+    \|_______|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|     \|__|\|_______|
+
+test
+'''
+
+echo "" && echo -e "${YELLOW}[REQUIRED]${WHITE} Ensure that the resources you want to monitor have Ops Agent installed and enabled." && echo ""
 
 ######################################## ARGUMENTS CHECK ########################################
 
@@ -87,6 +95,7 @@ do
     
     if [ -s ActiveInstances.txt ];
     then
+
         gcloud compute instances list --format "table(NAME)" --filter "STATUS=RUNNING" --project $ProjectID > InstanceNamesRaw.txt
         gcloud compute instances list --format "table(ZONE)" --filter "STATUS=RUNNING" --project $ProjectID > InstanceZonesRaw.txt
 
@@ -129,9 +138,10 @@ do
     
 done < $2
 
-# Define a service to monitor all VM instances using labels
+# Create a resource group
+curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"displayName": "test40", "filter": "resource.type=gce_instance metric.labels.component=monitoring"}' https://monitoring.googleapis.com/v3/projects/$MainProject/groups
 
-#2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
+# Define a service to monitor all VM instances using labels
 
 # Define a service to monitor all containers using labels
 
