@@ -26,7 +26,7 @@ create and launch a redundant web application using a simple network architectur
 '''
 
 echo -e "${YELLOW}[DISCLAIMER]${WHITE} This script was created for testing purposes and should be used in a production environment." && echo "" 
-echo -e "${YELLOW}[REQUIRED]${WHITE} Basic understanding of how GCP products work and the resources needed to create certain resources." && echo ""
+echo -e "${YELLOW}[REQUIRED]${WHITE} Don't forget to configure your startup script using the StartupScript.sh file in this repository." && echo ""
 
 ######################################## ARGUMENTS CHECK ########################################
 
