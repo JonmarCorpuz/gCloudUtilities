@@ -54,7 +54,7 @@ echo $MainProject
 ########################################## MONITORING ###########################################
 
 # Switch to the dedicated project for monitoring
-gcloud config set project $MainProject
+gcloud config set project $MainProject &> /dev/null
 
 echo && echo "DONE 3" && echo ""
 
@@ -64,40 +64,68 @@ echo && echo "DONE 3" && echo ""
 while read -r ProjectID; 
 do
 
-    gcloud config set project $MainProject
+    gcloud config set project $MainProject &> /dev/null
 
     echo $ProjectID
 
-    gcloud services enable monitoring --project=$ProjectID
-    gcloud services enable compute --project=$ProjectID 
+    gcloud services enable monitoring --project=$ProjectID &> /dev/null
+    gcloud services enable compute --project=$ProjectID &> /dev/null
 
-    echo && echo "DONE 4" && echo ""
+    echo "" && echo "DONE 4" && echo ""
 
     # Add the specified projects to the metric scope
-    gcloud beta monitoring metrics-scopes create projects/$ProjectID --project=$MainProject
+    gcloud beta monitoring metrics-scopes create projects/$ProjectID --project=$MainProject &> /dev/null
 
-    echo && echo "DONE 5" && echo ""
+    echo "" && echo "DONE 5" && echo ""
+
+    gcloud config set project $ProjectID &> /dev/null
+
+    echo "" && echo "DONE 000" && echo ""
 
     #1.List all VM instances (Store output in a file maybe)
-    #gcloud compute instances list --project $ProjectID > InstanceList2.txt
+    gcloud compute instances list --filter "STATUS=RUNNING" --limit 1 --project $ProjectID > ActiveInstances.txt
+    
+    if [ -s ActiveInstances.txt ];
+    then
+        gcloud compute instances list --format "table(NAME)" --filter "STATUS=RUNNING" --project $ProjectID > InstanceNamesRaw.txt
+        gcloud compute instances list --format "table(ZONE)" --filter "STATUS=RUNNING" --project $ProjectID > InstanceZonesRaw.txt
 
-    echo && echo "DONE 6" && echo ""
+        while read -r Name;
+        do 
+            echo ${Name##* } >> InstanceNames.txt
+        done < InstanceNamesRaw.txt
 
-    while read -r InstanceName; 
-    do
+        while read -r Zone;
+        do 
+            echo ${Zone##* } >> InstanceZones.txt
+        done < InstanceZonesRaw.txt
 
-        gcloud config set project $ProjectID
+        echo "" && echo "DONE 6" && echo ""
 
-        echo $InstanceName
+        paste -d' ' InstanceNames.txt InstanceZones.txt > InstancesInfo.txt
 
-        #2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
-        gcloud compute instances update $InstanceName \
-        --update-labels component=monitoring \
-        --zone us-central1-c
+        while read -r Name Zone;
+        do
 
-        echo && echo "DONE 7" && echo ""
+            echo $Name
+            echo $Zone
 
-    done < InstanceList2.txt
+            #2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
+            gcloud compute instances update $Name \
+            --update-labels component=monitoring \
+            --zone $Zone
+
+        done < InstancesInfo.txt
+
+        cat ActiveInstances.txt
+
+        rm InstanceNamesRaw.txt InstanceNames.txt InstanceZonesRaw.txt InstanceZones.txt
+
+        echo "" && echo "DONE 6.5" && echo ""
+
+    fi 
+
+    echo "" && echo "DONE 7" && echo ""
     
 done < $2
 
