@@ -15,7 +15,10 @@ gCloud Web Balancer is an interactive script written by Jonmar Corpuz to help GC
 
 # Infrastructure Components
 
-* TO DO
+* Managed Instance Group
+* Firewall Rules
+* Health Checks
+* External Application Load Balancer
 
 # Upcoming Features
 
