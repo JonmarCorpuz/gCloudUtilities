@@ -1,3 +1,10 @@
+# TO DO
+# Create log scope --> Add projects to log scope --> Add metrics
+# Ops Agent for Monitoring and Logging needs to be installed on VM instance
+# Create an uptime check
+# Create an alerting policy
+# Add even instances that aren't running to the resource group
+
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
@@ -53,16 +60,35 @@ do
     
 done < $2
 
-MainProject=$(head -n 1 $2)
+#MainProject=$(head -n 1 $2)
 
 echo && echo "DONE 2" && echo ""
 
-echo $MainProject
+#echo $MainProject
 
 ########################################## MONITORING ###########################################
 
+while [[ $ALWAYS_TRUE=true ]];
+do 
+
+    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name that would you like to call the main project that will monitor your other projects:) " MainProject
+
+    if gcloud projects describe $MainProject &> /dev/null;
+    then
+        echo "" && echo -e "${RED}[ERROR 1]${WHITE} A Virtual Private Network called ${MainProject} already exists in your project." && echo ""
+    else
+        gcloud projects create $MainProject
+        echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The main project has been created." && echo ""
+        break
+    fi
+done
+
 # Switch to the dedicated project for monitoring
 gcloud config set project $MainProject &> /dev/null
+gcloud services enable monitoring --project=$MainProject &> /dev/null
+gcloud services enable compute --project=$MainProject &> /dev/null
+
+echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The main project has been set and configured." && echo ""
 
 echo && echo "DONE 3" && echo ""
 
@@ -72,7 +98,7 @@ echo && echo "DONE 3" && echo ""
 while read -r ProjectID; 
 do
 
-    gcloud config set project $MainProject &> /dev/null
+    #gcloud config set project $MainProject &> /dev/null
 
     echo $ProjectID
 
@@ -86,7 +112,7 @@ do
 
     echo "" && echo "DONE 5" && echo ""
 
-    gcloud config set project $ProjectID &> /dev/null
+    #gcloud config set project $ProjectID &> /dev/null
 
     echo "" && echo "DONE 000" && echo ""
 
@@ -142,6 +168,8 @@ done < $2
 curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"displayName": "test40", "filter": "resource.type=gce_instance metric.labels.component=monitoring"}' https://monitoring.googleapis.com/v3/projects/$MainProject/groups
 
 # Define a service to monitor all VM instances using labels
+
+#2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
 
 # Define a service to monitor all containers using labels
 
