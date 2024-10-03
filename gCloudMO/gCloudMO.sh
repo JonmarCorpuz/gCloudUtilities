@@ -1,10 +1,3 @@
-# TO DO
-# Create log scope --> Add projects to log scope --> Add metrics
-# Ops Agent for Monitoring and Logging needs to be installed on VM instance
-# Create an uptime check
-# Create an alerting policy
-# Add even instances that aren't running to the resource group
-
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
@@ -71,20 +64,43 @@ echo && echo "DONE 2" && echo ""
 while [[ $ALWAYS_TRUE=true ]];
 do 
 
-    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name that would you like to call the main project that will monitor your other projects:) " MainProject
+    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the unique project ID that you would you like to give the main project that will monitor your other projects:) " MainProject
 
     if gcloud projects describe $MainProject &> /dev/null;
     then
-        echo "" && echo -e "${RED}[ERROR 1]${WHITE} A Virtual Private Network called ${MainProject} already exists in your project." && echo ""
+        echo "" && echo -e "${RED}[ERROR 1]${WHITE} A project with the ${MainProject} project ID already exists either in your own project or externally." && echo ""
     else
-        gcloud projects create $MainProject
-        echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The main project has been created." && echo ""
-        break
+        if gcloud projects create $MainProject;
+        then 
+            #gcloud projects create $MainProject
+            echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The main project has been created." && echo ""
+            break
+        else
+            echo "" && echo -e "${RED}[ERROR 2]${WHITE} A project with the ${MainProject} project ID already exists either in your own project or externally." && echo ""
+        fi 
     fi
 done
 
 # Switch to the dedicated project for monitoring
 gcloud config set project $MainProject &> /dev/null
+
+#
+while [[ $ALWAYS_TRUE=true ]];
+do 
+
+    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the billing account ID that you would like to link to this project:) " BillingID
+
+    ListBillingAccounts=$(gcloud billing accounts list)
+
+    if echo $ListBillingAccounts | grep -q $BillingID; then 
+        gcloud billing projects link $MainProject --billing-account $BillingID
+        break
+    else 
+        echo "" && echo -e "${RED}[ERROR 3]${WHITE} A billing account with the $BillingID billing ID doesn't exist." && echo ""
+    fi 
+
+done 
+
 gcloud services enable monitoring --project=$MainProject &> /dev/null
 gcloud services enable compute --project=$MainProject &> /dev/null
 
@@ -98,7 +114,7 @@ echo && echo "DONE 3" && echo ""
 while read -r ProjectID; 
 do
 
-    #gcloud config set project $MainProject &> /dev/null
+    gcloud config set project $MainProject &> /dev/null
 
     echo $ProjectID
 
@@ -112,18 +128,18 @@ do
 
     echo "" && echo "DONE 5" && echo ""
 
-    #gcloud config set project $ProjectID &> /dev/null
+    gcloud config set project $ProjectID &> /dev/null
 
     echo "" && echo "DONE 000" && echo ""
 
     #1.List all VM instances (Store output in a file maybe)
-    gcloud compute instances list --filter "STATUS=RUNNING" --limit 1 --project $ProjectID > ActiveInstances.txt
+    gcloud compute instances list --limit 1 --project $ProjectID > ActiveInstances.txt # --filter "STATUS=RUNNING"
     
     if [ -s ActiveInstances.txt ];
     then
 
-        gcloud compute instances list --format "table(NAME)" --filter "STATUS=RUNNING" --project $ProjectID > InstanceNamesRaw.txt
-        gcloud compute instances list --format "table(ZONE)" --filter "STATUS=RUNNING" --project $ProjectID > InstanceZonesRaw.txt
+        gcloud compute instances list --format "table(NAME)" --project $ProjectID > InstanceNamesRaw.txt # --filter "STATUS=RUNNING"
+        gcloud compute instances list --format "table(ZONE)" --project $ProjectID > InstanceZonesRaw.txt # --filter "STATUS=RUNNING"
 
         while read -r Name;
         do 
@@ -145,15 +161,16 @@ do
             echo $Name
             echo $Zone
 
+            echo "gcloud compute instances update ${Name} --update-labels component=gce_monitoring --zone ${Zone}"
+
             #2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
             gcloud compute instances update $Name \
-            --update-labels component=monitoring \
-            --zone $Zone
+            --update-labels component=gce_monitoring \
+            --zone=$Zone
 
         done < InstancesInfo.txt
 
         cat ActiveInstances.txt
-
         rm InstanceNamesRaw.txt InstanceNames.txt InstanceZonesRaw.txt InstanceZones.txt
 
         echo "" && echo "DONE 6.5" && echo ""
@@ -165,7 +182,7 @@ do
 done < $2
 
 # Create a resource group
-curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"displayName": "test40", "filter": "resource.type=gce_instance metric.labels.component=monitoring"}' https://monitoring.googleapis.com/v3/projects/$MainProject/groups
+curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"displayName": "test40", "filter": "resource.type=gce_instance metric.labels.component=gce_monitoring"}' https://monitoring.googleapis.com/v3/projects/$MainProject/groups
 
 # Define a service to monitor all VM instances using labels
 
