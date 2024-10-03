@@ -1,2 +1,1 @@
-<MONITORING_PROJECT>
-<MONITORED_PROJECT>
+Each Google Cloud project ID should be on their own line. To begin, please replace this line with the project ID of the project that you want to monitor.
