@@ -23,5 +23,5 @@ echo '''
 test
 '''
 
-echo "" && echo -e "${YELLOW}[REQUIRED]${WHITE} Ensure that the resources you want to monitor have Ops Agent installed and enabled." && echo ""
+echo "" && echo -e "${YELLOW}[REQUIRED]${WHITE} ." && echo ""
 
