@@ -8,3 +8,10 @@
     \|_______|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|     \|__|\|_______|
                                                                                          
 ```
+
+
+# Resource Labels
+- https://cloud.google.com/compute/docs/labeling-resources#gcloud_1
+
+# Metrics Scope 
+- https://cloud.google.com/monitoring/settings/manage-api
