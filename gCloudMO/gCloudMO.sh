@@ -1,3 +1,10 @@
+# TO DO
+# Create log scope --> Add projects to log scope --> Add metrics
+# Ops Agent for Monitoring and Logging needs to be installed on VM instance
+# Create an uptime check
+# Create an alerting policy
+# Add even instances that aren't running to the resource group
+
 ####################################### STATIC VARIABLES ########################################
 
 # Text Color
@@ -20,7 +27,8 @@ echo '''
    \ \_______\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\    \ \__\ \_______\
     \|_______|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|     \|__|\|_______|
 
-test
+An interactive script written by Jonmar Corpuz that allows Google Cloud customers to centrally monitor 
+all their resources using a single project. 
 '''
 
 echo "" && echo -e "${YELLOW}[REQUIRED]${WHITE} Ensure that the resources you want to monitor have Ops Agent installed and enabled." && echo ""
@@ -33,14 +41,23 @@ do
     case $opt in
         f) file="$OPTARG"
         ;;
-        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./gCloudMO.sh -f <TEXT_FILE>" && echo "" &&  exit 1
+        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./gCloudMO.sh -f InstanceList.txt." && echo "" &&  exit 1
         ;;
-        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./gCloudMO.sh -f <TEXT_FILE>." && echo "" && exit 1
+        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./gCloudMO.sh -f InstanceList.txt." && echo "" && exit 1
         ;;
     esac
 done
 
-echo && echo "DONE 1" && echo ""
+# Check if the user provided only the required values when executing the script
+if [ $OPTIND -ne 3 ]; 
+then
+    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./gCloudMO.sh -f InstanceList.txt" && echo "" &&  exit 1
+fi
+
+if ! cat $2 &> /dev/null;
+then
+    echo -e "${RED}[ERROR 4]${WHITE} Please use the provided InstanceList.txt file included in this repository." && echo "" &&  exit 1
+fi
 
 # Verify that the projects in the provided file all exist
 while read -r ProjectID; 
@@ -48,16 +65,10 @@ do
 
     if ! gcloud projects describe $ProjectID &> /dev/null;
     then
-        echo "" && echo -e "${RED}[ERROR 1]${WHITE} ${ProjectID} dosen't exist." && echo "" && exit 1
+        echo "" && echo -e "${RED}[ERROR 5]${WHITE} ${ProjectID} dosen't exist." && echo "" && exit 1
     fi
     
 done < $2
-
-#MainProject=$(head -n 1 $2)
-
-echo && echo "DONE 2" && echo ""
-
-#echo $MainProject
 
 ########################################## MONITORING ###########################################
 
@@ -106,11 +117,6 @@ gcloud services enable compute --project=$MainProject &> /dev/null
 
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The main project has been set and configured." && echo ""
 
-echo && echo "DONE 3" && echo ""
-
-# Enable Cloud Monitoring API
-#gcloud services enable monitoring --project=$MainProject
-
 while read -r ProjectID; 
 do
 
@@ -121,16 +127,10 @@ do
     gcloud services enable monitoring --project=$ProjectID &> /dev/null
     gcloud services enable compute --project=$ProjectID &> /dev/null
 
-    echo "" && echo "DONE 4" && echo ""
-
     # Add the specified projects to the metric scope
     gcloud beta monitoring metrics-scopes create projects/$ProjectID --project=$MainProject &> /dev/null
 
-    echo "" && echo "DONE 5" && echo ""
-
     gcloud config set project $ProjectID &> /dev/null
-
-    echo "" && echo "DONE 000" && echo ""
 
     #1.List all VM instances (Store output in a file maybe)
     gcloud compute instances list --limit 1 --project $ProjectID > ActiveInstances.txt # --filter "STATUS=RUNNING"
@@ -150,8 +150,6 @@ do
         do 
             echo ${Zone##* } >> InstanceZones.txt
         done < InstanceZonesRaw.txt
-
-        echo "" && echo "DONE 6" && echo ""
 
         paste -d' ' InstanceNames.txt InstanceZones.txt > InstancesInfo.txt
 
@@ -173,27 +171,9 @@ do
         cat ActiveInstances.txt
         rm InstanceNamesRaw.txt InstanceNames.txt InstanceZonesRaw.txt InstanceZones.txt
 
-        echo "" && echo "DONE 6.5" && echo ""
-
     fi 
-
-    echo "" && echo "DONE 7" && echo ""
     
 done < $2
 
 # Create a resource group
-curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"displayName": "test40", "filter": "resource.type=gce_instance metric.labels.component=gce_monitoring"}' https://monitoring.googleapis.com/v3/projects/$MainProject/groups
-
-# Define a service to monitor all VM instances using labels
-
-#2.Add label for monitoring if it does not exist already (Prompt the user for a label name)
-
-# Define a service to monitor all containers using labels
-
-########################################## REFERENCES ###########################################
-
-# Resource Labels
-# - https://cloud.google.com/compute/docs/labeling-resources#gcloud_1
-
-# Metrics Scope 
-# - https://cloud.google.com/monitoring/settings/manage-api
+curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"displayName": "Compute Instances", "filter": "resource.type=gce_instance metric.labels.component=gce_monitoring"}' https://monitoring.googleapis.com/v3/projects/$MainProject/groups
