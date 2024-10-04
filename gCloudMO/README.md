@@ -10,8 +10,10 @@
 ```
 
 
-# Resource Labels
+# References
+
+Resource Labels
 - https://cloud.google.com/compute/docs/labeling-resources#gcloud_1
 
-# Metrics Scope 
+Metrics Scope 
 - https://cloud.google.com/monitoring/settings/manage-api
