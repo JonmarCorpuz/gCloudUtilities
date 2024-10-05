@@ -19,7 +19,7 @@ all their resources using a single project.
 - [ ] Allow customers to monitor other resources as well, such as GKE and AppEngine
 - [ ] Create a resource group for every service it allows the customer to monitor
 - [ ] Add custom metrics for more observability
-- [ ] Create alerts
+- [ ] Create and configure alerts
 
 # References
 
