@@ -80,6 +80,7 @@ then
     fi
 
     sed -i 's/'"$ProjectID"'/PROJECT_ID/g' ./test/test.tf
+    sed -i 's/'"$ProjectID"'/PROJECT_ID/g' ./variables.tf
     echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} Yay it worked!" && exit 0
 else
     sed -i 's/'"$ProjectID"'/PROJECT_ID/g' ./test/test.tf
