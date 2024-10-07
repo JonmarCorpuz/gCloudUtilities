@@ -58,7 +58,7 @@ fi
 read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the project ID of the project where you want to deploy the resources in:) " ProjectID
 
 #
-sed -i 's/PROJECT_ID/'"$ProjectID"'/g' ./tests/setup/mainls.tf
+sed -i 's/PROJECT_ID/'"$ProjectID"'/g' ./tests/setup/main.tf
 sed -i 's/PROJECT_ID/'"$ProjectID"'/g' ./variables.tf
 
 #
