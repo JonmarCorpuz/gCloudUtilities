@@ -52,43 +52,36 @@ else
     echo -e "${RED}[ERROR 4]${WHITE} Usage: ./TerraformWB.sh -a {apply|destroy}" && echo "" &&  exit 1
 fi
 
-########################################## TERRAFORM ############################################
+###########
 
-#
 read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the project ID of the project where you want to deploy the resources in:) " ProjectID
 
-#
 sed -i 's/PROJECT_ID/'"$ProjectID"'/g' ./test/test.tf
 
-#
 terraform init
 
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} Initialized."
+
 echo "" && echo -e "${YELLOW}[WARNING]${WHITE} Validating keys." && echo ""
 
-#
 if terraform test;
 then
 
     echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} Keys are valid." && echo ""
 
-    #
     if [[ ${2,,} == "apply" ]];
     then
+        #echo ""
         terraform apply --auto-approve
     else
+        #echo ""
         terraform destroy --auto-approve
         rm -r .terraform/*
     fi
 
-    #
     sed -i 's/'"$ProjectID"'/PROJECT_ID/g' ./test/test.tf
     echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} Yay it worked!" && exit 0
-
 else
-
-    #
     sed -i 's/'"$ProjectID"'/PROJECT_ID/g' ./test/test.tf
     echo "" && echo -e "${RED}[ERROR 5]${WHITE} Terraform test failed." && echo "" && exit 1
-
 fi 
