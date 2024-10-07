@@ -8,6 +8,9 @@
         \|__|  \|_______|\|__|\|__|\|__|\|__|\|__|\|__|\|__|    \|_______|\|__|\|__|\|__|     \|__|\|____________|\|_______|
 ```
 
+TerraformWB is the equivalent of Jonmar's gCloudWB but uses Terraform to create and manage the underlying infrastructure rather than Google Cloud's Cloud SDK.
+
+
 # REFERENCES
 
 * https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template
