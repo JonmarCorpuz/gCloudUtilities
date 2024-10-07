@@ -45,27 +45,6 @@ resource "google_compute_firewall" "allow_health_check" {
 
 }
 
-//
-#resource "google_compute_firewall" "allow-http" {
-#  name          = "allow-http-rule"
-#  project       = var.project_id
-#  network       = "${var.project_id}-vpc"
-#  source_ranges = ["0.0.0.0/0"]
-
-#  allow {
-#    protocol = "tcp"
-#    ports    = ["80"]
-#  }
-
-#  target_tags = ["allow-health-check"]
-#  priority    = 1000
-
-#  depends_on = [
-#    google_compute_network.vpc-network
-#  ]
-
-#}
-
 ###################################### NETWORKING ######################################
 
 # Virtual Private Cloud 
@@ -128,10 +107,6 @@ resource "google_compute_instance_template" "mig-template" {
     google_compute_subnetwork.vpc-private-subnet
   ]
 
-#  service_account {
-#    email  = google_service_account.default.email
-#    scopes = ["cloud-platform"]
-#  }
 }
 
 # Instance Group Health Check
@@ -230,21 +205,6 @@ resource "google_compute_url_map" "lb-url-map" {
   name            = "${var.project_id}-load-balancer"
   description     = "Route request sent to the HTTP Proxy to the backend service."
   default_service = google_compute_backend_service.lb-backend-service.id
-
-#  host_rule {
-#    hosts        = ["mysite.com"]
-#    path_matcher = "allpaths"
-#  }
-
-#  path_matcher {
-#    name            = "allpaths"
-#    default_service = google_compute_backend_service.default.id
-
-#    path_rule {
-#      paths   = ["/*"]
-#      service = google_compute_backend_service.default.id
-#    }
-#  }
 
   depends_on = [
     google_compute_network.vpc-network
