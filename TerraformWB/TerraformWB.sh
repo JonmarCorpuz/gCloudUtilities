@@ -22,7 +22,7 @@ echo '''
        \ \__\ \ \_______\ \__\\ _\\ \__\\ _\\ \__\ \__\ \__\   \ \_______\ \__\\ _\\ \__\    \ \__\ \____________\ \_______\
         \|__|  \|_______|\|__|\|__|\|__|\|__|\|__|\|__|\|__|    \|_______|\|__|\|__|\|__|     \|__|\|____________|\|_______|
 
-TerraformWB is the equivalent of Jonmar's gCloudWB but uses Terraform to create and manage the underlying infrastructure rather than Google Cloud's Cloud SDK.
+TerraformWB is the equivalent of gCloudWB but uses Terraform to create and manage the underlying infrastructure rather than Cloud SDK.
 '''
 
 # Check if the user executed the script correctly
