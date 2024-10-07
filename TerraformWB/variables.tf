@@ -1,7 +1,7 @@
 variable "project_id" {
   description = "The project's ID."
   type        = string
-  default     = "jonmardemoproject"
+  default     = "PROJECT_ID"
 }
 
 variable "project_region" {
