@@ -35,9 +35,9 @@ while getopts ":p:" opt; do
     case $opt in
         f) file="$OPTARG"
         ;;
-        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./CreateVPC.sh -p <PROJECT_ID>$" && echo "" &&  exit 1
+        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./gCloudWB.sh -p <PROJECT_ID>$" && echo "" &&  exit 1
         ;;
-        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./CreateVPC.sh -p <PROJECT_ID>." && echo "" && exit 1
+        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./gCloudWB.sh -p <PROJECT_ID>." && echo "" && exit 1
         ;;
     esac
 done
@@ -45,7 +45,7 @@ done
 # Check if the user provided only the required values when executing the script
 if [ $OPTIND -eq 1 ]; 
 then
-    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./CreateVPC.sh -p <PROJECT_ID>" && echo "" &&  exit 1
+    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./gCloudWB.sh -p <PROJECT_ID>" && echo "" &&  exit 1
 fi
 
 ######################################### SET PROJECT ###########################################
