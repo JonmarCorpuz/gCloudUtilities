@@ -67,6 +67,8 @@ do
 
 done
 
+# Take the role line and list all permissions 
+
 ################################### GATHER USER PERMISSIONS #####################################
 
 #gcloud asset analyze-iam-policy --project=$2 \
