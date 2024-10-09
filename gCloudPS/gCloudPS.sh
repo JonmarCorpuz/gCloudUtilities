@@ -69,6 +69,8 @@ done
 
 # Take the role line and list all permissions 
 
+# Check whether it's a custom role or a predefined role and query accordingly
+
 ################################### GATHER USER PERMISSIONS #####################################
 
 #gcloud asset analyze-iam-policy --project=$2 \
