@@ -26,9 +26,9 @@ echo '''
 ######################################## ARGUMENTS CHECK ########################################
 
 # Check if the user provided only the required values when executing the script
-if [ $OPTIND -eq 1 ]; 
+if [ $OPTIND -ne 3 ]; 
 then
-    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./gCloudWB.sh -p <PROJECT_ID>" && echo "" &&  exit 1
+    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./gCloudPS.sh -p <PROJECT_ID>" && echo "" &&  exit 1
 fi
 
 ###################################### GATHER USER INPUT ########################################
