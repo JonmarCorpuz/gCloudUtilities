@@ -26,8 +26,9 @@ echo '''
 ######################################## ARGUMENTS CHECK ########################################
 
 # Check if the user provided only the required values when executing the script
-if [ $OPTIND -ne 3 ]; 
+if [ $OPTIND -ne 1 ]; 
 then
+    echo $OPTIND
     echo -e "${RED}[ERROR 3]${WHITE} Usage: ./gCloudPS.sh -p <PROJECT_ID>" && echo "" &&  exit 1
 fi
 
@@ -42,15 +43,10 @@ do
     #
     if gcloud projects describe $ProjectID &> /dev/null;
     then
-        echo "" && echo -e "${RED}[ERROR 1]${WHITE} A project with the ${ProjectID} project ID doesn't exists within your organization or you don't have access to it." && echo ""
+        echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The project $ProjectID was found." && echo ""
+        break
     else
-        if gcloud projects create $ProjectID;
-        then 
-            echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The main project has been created." && echo ""
-            break
-        else
-            echo "" && echo -e "${RED}[ERROR 2]${WHITE} A project with the ${ProjectID} project ID doesn't exists within your organization or you don't have access to it." && echo ""
-        fi 
+        echo "" && echo -e "${RED}[ERROR 1]${WHITE} A project with the ${ProjectID} project ID doesn't exists within your organization or you don't have access to it." && echo ""
     fi
 done
 
