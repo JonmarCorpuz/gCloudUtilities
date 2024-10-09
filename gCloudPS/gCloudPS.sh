@@ -67,9 +67,15 @@ do
 
 done
 
-# Take the role line and list all permissions 
+# Take the role line
 
 # Check whether it's a custom role or a predefined role and query accordingly
+
+# List all the permissions from that role
+
+# From the permissions, determine which resource it gives access to
+
+# After listing the resources it has access to, define what type of access it has
 
 ################################### GATHER USER PERMISSIONS #####################################
 
