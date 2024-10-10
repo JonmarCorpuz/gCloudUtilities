@@ -81,4 +81,4 @@ done
 
 gcloud asset analyze-iam-policy --project=$2 \
     --full-resource-name=//compute.googleapis.com/projects/jonmardemoproject \
-    --identity='user:'$EntityEmail'
+    --identity='user:'$EntityEmail
