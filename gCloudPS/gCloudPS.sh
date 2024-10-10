@@ -76,6 +76,15 @@ gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep user: > 
 # Get each user's role
 while read User;
 do
-    echo "${User##* }" > Roles.txt
+
+    # Get user email only
+    UserEmail=$(echo "${User##* }")
+
+    # Fetch user's role
+    UserRole=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity='user:'$UserEmail | grep "role")
+    
+    # List role's permissions
+    gcloud iam roles describe $UserRole --project $ProjectID >> Test.txt
+    
 done < Users.txt
 
