@@ -79,6 +79,8 @@ done
 
 ################################### GATHER USER PERMISSIONS #####################################
 
-gcloud asset analyze-iam-policy --project=$2 \
-    --full-resource-name=//compute.googleapis.com/projects/jonmardemoproject \
-    --identity='user:'$EntityEmail
+RetrievePermissions=$(gcloud asset analyze-iam-policy --project=$2 --identity='user:'$EntityEmail | grep "role")
+echo $RetrievePermissions > test.yaml
+
+# Iterate through every line and echo the last string of every line into a file
+echo 
