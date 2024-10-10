@@ -73,6 +73,8 @@ done
 
 gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep user: > Users.txt
 
+echo "" && echo "pleasework" && echo ""
+
 # Get each user's role
 while read User;
 do
@@ -84,18 +86,21 @@ do
     UserRoleRaw=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity=$UserEmail | grep "role")
     UserRole=$(echo "${UserRoleRaw##* }")
 
-    echo "??????"
+    echo "" && echo "1" && echo ""
 
-    UserRole=$(echo $UserRole | sed s/"projects/$ProjectID/"//)
+    # Remove "projects/$ProjectID" from the UserRole
 
-    echo "??????"
+    UserRole=$(echo $UserRole | sed "s/\b$Remove\b//g")
+
     echo $UserRoleRaw
     echo $UserRole
-    echo "??????"
 
+    echo "" && echo "2" && echo ""
     
     # List role's permissions
     gcloud iam roles describe $UserRole --project $ProjectID >> Test.txt
+
+    echo "" && echo "3" && echo ""
     
 done < Users.txt
 
