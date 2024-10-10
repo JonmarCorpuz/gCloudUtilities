@@ -86,7 +86,7 @@ do
 
     echo "??????"
 
-    UserRole=${UserROle//"projects/$ProjectID/"/}
+    UserRole=$(echo $UserRole | sed s/"projects/$ProjectID/"//)
 
     echo "??????"
     echo $UserRoleRaw
