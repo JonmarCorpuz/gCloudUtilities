@@ -83,6 +83,9 @@ do
     # Fetch user's role
     UserRoleRaw=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity=$UserEmail | grep "role")
     UserRole=$(echo "${UserRoleRaw##* }")
+
+    echo $UserRoleRaw
+    echo $UserRole
     
     # List role's permissions
     gcloud iam roles describe $UserRole --project $ProjectID >> Test.txt
