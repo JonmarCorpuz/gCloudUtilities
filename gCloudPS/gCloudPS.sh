@@ -67,20 +67,15 @@ do
 
 done
 
-# Take the role line
-
-# Check whether it's a custom role or a predefined role and query accordingly
-
-# List all the permissions from that role
-
-# From the permissions, determine which resource it gives access to
-
-# After listing the resources it has access to, define what type of access it has
-
 ################################### GATHER USER PERMISSIONS #####################################
 
-RetrievePermissions=$(gcloud asset analyze-iam-policy --project=$2 --identity='user:'$EntityEmail | grep "role")
-echo $RetrievePermissions > test.yaml
+# List all users on the project
 
-# Iterate through every line and echo the last string of every line into a file
-echo 
+gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep user: > Users.txt
+
+# Get each user's role
+while read User;
+do
+    echo "${User##* }" > Roles.txt
+done < Users.txt
+
