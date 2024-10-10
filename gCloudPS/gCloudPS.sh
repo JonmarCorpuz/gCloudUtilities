@@ -79,5 +79,6 @@ done
 
 ################################### GATHER USER PERMISSIONS #####################################
 
-#gcloud asset analyze-iam-policy --project=$2 \
-#    --full-resource-name=//compute.googleapis.com/projects/jonmardemoproject \
+gcloud asset analyze-iam-policy --project=$2 \
+    --full-resource-name=//compute.googleapis.com/projects/jonmardemoproject \
+    --identity='user:'$EntityEmail'
