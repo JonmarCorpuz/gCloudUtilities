@@ -20,7 +20,6 @@ echo '''
    \ \_______\ \_______\ \_______\ \_______\ \_______\ \_______\ \__\     ____\_\  \ 
     \|_______|\|_______|\|_______|\|_______|\|_______|\|_______|\|__|    |\_________\
                                                                          \|_________|
-
 '''
 
 ######################################## ARGUMENTS CHECK ########################################
@@ -102,21 +101,36 @@ do
     # List role's permissions
     if gcloud iam roles describe $Role &> /dev/null;
     then
-        gcloud iam roles describe $Role >> Test.txt
+        gcloud iam roles describe $Role >> $UserEmail-Permissions.yaml
     else
         Remove2="projects/$ProjectID/roles/"
         Role2=${UserRole//"$Remove2"/}
 
-        gcloud iam roles describe $Role2 --project $ProjectID >> Test.txt
+        gcloud iam roles describe $Role2 --project $ProjectID >> $UserEmail-Permissions.yaml
     fi
 
     echo "" && echo "3" && echo ""
+
+    cat $UserEmail-Permissions.yaml | grep "-" > tmp.txt
+
+    # List the resources that the user can access
+    #Create a list and append every resource that you see
+
+    touch tmp2.txt
+
+    # Split the permission, ex: accessapproval.requests.approve, into three parts and take the first
+
+    while read Permission;
+    do
+
+       if 
+        # If file doesn't include the resource, add it, else nah
+
+    done < tmp.txt
     
 done < Users.txt
 
-# List the resources that the user can access
-
-# List the type of access that the user has for each resource they can access
+# List the type of access that the user has for each resource they can access using the list generated from the previous step
 
 # Cleanup
 rm Users.txt
