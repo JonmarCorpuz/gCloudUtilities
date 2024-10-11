@@ -90,16 +90,25 @@ do
 
     # Remove "projects/$ProjectID" from the UserRole
 
-    Remove="projects/$ProjectID"
-    Role=${UserRole//"Remove"/}
+    Remove="projects/$ProjectID/"
+    Role=${UserRole//"$Remove"/}
 
     echo $UserRoleRaw
     echo $UserRole
+    echo $Role
 
     echo "" && echo "2" && echo ""
     
     # List role's permissions
-    gcloud iam roles describe $UserRole --project $ProjectID >> Test.txt
+    if gcloud iam roles describe $Role &> /dev/null;
+    then
+        gcloud iam roles describe $Role >> Test.txt
+    else
+        Remove2="/roles/"
+        Role2=${Role//"$Remove2"/}
+
+        gcloud iam roles describe $Role2 --project $ProjectID >> Test.txt
+    fi
 
     echo "" && echo "3" && echo ""
     
