@@ -90,7 +90,8 @@ do
 
     # Remove "projects/$ProjectID" from the UserRole
 
-    UserRole=$(echo $UserRole | sed "s/\b$Remove\b//g")
+    Remove="projects/$ProjectID"
+    Role=${UserRole//"Remove"/}
 
     echo $UserRoleRaw
     echo $UserRole
