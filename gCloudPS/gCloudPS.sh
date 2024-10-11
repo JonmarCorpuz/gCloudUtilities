@@ -125,8 +125,10 @@ do
     FullPermission=$(echo "${Permission##* }")
     Resource=$(echo $FullPermission | tr "." "\n" | head -n 1)
 
-        if 
         # If file doesn't include the resource, add it, else nah
+        if ;
+        then
+       
         else
 
         fi
