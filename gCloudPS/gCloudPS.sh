@@ -118,13 +118,18 @@ do
 
     touch tmp2.txt
 
-    # Split the permission, ex: accessapproval.requests.approve, into three parts and take the first
-
     while read Permission;
     do
 
-       if 
+    # Split the permission, ex: accessapproval.requests.approve, into three parts and take the first
+    FullPermission=$(echo "${Permission##* }")
+    Resource=$(echo $FullPermission | tr "." "\n" | head -n 1)
+
+        if 
         # If file doesn't include the resource, add it, else nah
+        else
+
+        fi
 
     done < tmp.txt
     
