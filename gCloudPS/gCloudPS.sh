@@ -104,8 +104,8 @@ do
     then
         gcloud iam roles describe $Role >> Test.txt
     else
-        Remove2="/roles/"
-        Role2=${Role//"$Remove2"/}
+        Remove2="projects/$ProjectID/roles/"
+        Role2=${UserRole//"$Remove2"/}
 
         gcloud iam roles describe $Role2 --project $ProjectID >> Test.txt
     fi
@@ -114,3 +114,5 @@ do
     
 done < Users.txt
 
+# Cleanup
+rm Users.txt
