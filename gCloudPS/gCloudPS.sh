@@ -114,5 +114,9 @@ do
     
 done < Users.txt
 
+# List the resources that the user can access
+
+# List the type of access that the user has for each resource they can access
+
 # Cleanup
 rm Users.txt
