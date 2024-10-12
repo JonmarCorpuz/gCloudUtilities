@@ -84,7 +84,7 @@ do
     UserEmail=$(echo "${User##* }")
 
     touch $ProjectID-$User.txt
-    echo "User: ${UserEmail}" >> $Filename.txt
+    echo "User: ${UserEmail}" >> $Filename
 
     # Fetch user's role
     UserRoleRaw=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity=$UserEmail | grep "role")
