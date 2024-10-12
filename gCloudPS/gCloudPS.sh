@@ -72,7 +72,7 @@ do
     Remove4="@gmail.com"
     Username=${TestUserEmail//"$Remove4"/}
 
-    Filename="User-${Username}"
+    Filename="USER@${Username}"
     #echo $Filename
 
     touch ${Filename}.txt
