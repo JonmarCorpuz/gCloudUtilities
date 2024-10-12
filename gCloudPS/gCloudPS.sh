@@ -49,85 +49,79 @@ do
     fi
 done
 
-# Ask for user or SA email
-while [[ $ALWAYS_TRUE=true ]];
-do 
-
-    #
-    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the email address of the entity that you want to audit:) " EntityEmail
-
-    if [[ $(gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep user:$EntityEmail | wc -c) -ne 0 ]];
-    then
-        echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The entity $EntityMail was found." && echo ""
-        break
-    else
-        echo "" && echo -e "${RED}[ERROR 3]${WHITE} $EntityEmail does not exist in the specified project." && echo ""
-    fi
-
-done
-
 ################################### GATHER USER PERMISSIONS #####################################
+
+FolderName="gCloudPS-Output"
+mkdir $FolderName
 
 # List all users on the project
 
 gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep user: > Users.txt
 
-echo "" && echo "pleasework" && echo ""
+#echo "" && echo "pleasework" && echo ""
 
 # Get each user's role
 while read User;
 do
 
-    Filename="${ProjectID}-${User}.txt"
-
     # Get user email only
     UserEmail=$(echo "${User##* }")
 
-    touch $ProjectID-$User.txt
-    echo "User: ${UserEmail}" >> $Filename
+    Remove3="user:"
+    TestUserEmail=${UserEmail//"$Remove3"/}
+    Remove4="@gmail.com"
+    Username=${TestUserEmail//"$Remove4"/}
+
+    Filename="User-${Username}"
+    #echo $Filename
+
+    touch ${Filename}.txt
+
+    echo "" >> ${Filename}.txt
+    echo "=== User Information ==========" >> ${Filename}.txt
+    echo "User: ${UserEmail}" >> ${Filename}.txt
 
     # Fetch user's role
     UserRoleRaw=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity=$UserEmail | grep "role")
     UserRole=$(echo "${UserRoleRaw##* }")
 
-    echo "" && echo "1" && echo ""
-
-    # Remove "projects/$ProjectID" from the UserRole
+    #echo "" && echo "1" && echo ""
 
     Remove="projects/$ProjectID/"
     Role=${UserRole//"$Remove"/}
 
-    echo $UserRoleRaw
-    echo $UserRole
-    echo $Role
+    #echo $UserRoleRaw
+    #echo $UserRole
+    #echo $Role
 
-    echo "" && echo "2" && echo ""
+    #echo "" && echo "2" && echo ""
     
     # List role's permissions
-    if gcloud iam roles describe $Role &> /dev/null;
+    if gcloud iam roles describe $Role;
     then
+    
         # Predefined Role
         gcloud iam roles describe $Role >> PermissionsRaw-$UserEmail.yaml
-        echo "R O L E  S U M M A R Y" >> $Filename
-        echo "" >> $Filename
-        echo "Role type: Predefined" >> $Filename
-        echo "Role:      ${Role}" >> $Filename
-        echo "" >> $Filename
+        echo "" >> ${Filename}.txt
+        echo "Role type: Predefined" >> ${Filename}.txt
+        echo "Role:      ${Role}" >> ${Filename}.txt
+
     else
+    
         # Custom Role
         Remove2="projects/$ProjectID/roles/"
         Role2=${UserRole//"$Remove2"/}
 
         gcloud iam roles describe $Role2 --project $ProjectID >> PermissionsRaw-$UserEmail.yaml
 
-        echo "R O L E  S U M M A R Y" $Filename
-        echo "" >> $Filename
-        echo "- Role type: Custom" >> $Filename
-        echo "- Role:      ${Role}" >> $Filename
-        echo "" >> $Filename
+        echo "=== Role Summary ==============" ${Filename}.txt
+        echo "" >> ${Filename}.txt
+        echo "- Role type: Custom" >> ${Filename}.txt
+        echo "- Role:      ${Role}" >> ${Filename}.txt
+
     fi
 
-    echo "" && echo "3" && echo ""
+    #echo "" && echo "3" && echo ""
 
     cat PermissionsRaw-$UserEmail.yaml | grep "-" > Permissions-$UserEmail.yaml
 
@@ -143,14 +137,11 @@ do
         FullPermission=$(echo "${Permission##* }")
         Resource=$(echo $FullPermission | tr "." "\n" | head -n 1)
 
-        echo $Resource
+        #echo $Resource
 
         # If file doesn't include the resource, add it, else nah
-        if grep -Fxq "${Resource}" AllowedResources-$UserEmail.txt;
+        if ! grep -Fxq "${Resource}" AllowedResources-$UserEmail.txt &> /dev/null;
         then
-            echo "Already in the list"
-        else
-            echo "Adding"
             echo "${Resource}" >> AllowedResources-$UserEmail.txt
         fi
 
@@ -158,25 +149,22 @@ do
 
     sed -i '1d;$d' AllowedResources-$UserEmail.txt
 
-    echo "P E R M I S S I O N S  S U M M A R Y" >> $Filename
+    echo "" >> ${Filename}.txt
+    echo "=== Accessible Resources ======" >> ${Filename}.txt
+    cat AllowedResources-$UserEmail.txt >> ${Filename}.txt
 
-    echo "" >> $Filename
-    echo "=== Accessible Resources ===" >> $Filename
-    cat AllowedResources-$UserEmail.txt >> $Filename
+    echo "" >> ${Filename}.txt
+    echo "=== Permissions ===============" >> ${Filename}.txt
+    cat Permissions-$UserEmail.yaml | grep "-" >> ${Filename}.txt
+    echo "" >> ${Filename}.txt
 
-    echo "" >> $Filename
-    echo "=== Permissions ===" >> $Filename
-    cat PermissionsRaw-$UserEmail.yaml | grep "-" >> $Filename
-    echo "" >> $Filename
+    mv ${Filename}.txt $FolderName
+    mv Users.txt $FolderName
 
-    echo "" >> $Filename
-    echo "=================================================================================================" >> $Filename
-    echo "" $Filename
-    
+    rm PermissionsRaw-$UserEmail.yaml
+    rm Permissions-$UserEmail.yaml
+    rm AllowedResources-$UserEmail.txt
+
 done < Users.txt
 
 # Generate a summarized file for all permissions for all users in this project
-
-
-# Cleanup
-rm Users.txt
