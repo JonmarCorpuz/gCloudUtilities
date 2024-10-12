@@ -137,6 +137,8 @@ do
         fi
 
     done < Permissions-$UserEmail.yaml
+
+    sed -i '1d;$d' AllowedResources-$UserEmail.txt
     
 done < Users.txt
 
