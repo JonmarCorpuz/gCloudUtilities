@@ -111,7 +111,7 @@ do
 
     echo "" && echo "3" && echo ""
 
-    awk '{print $1}' PermissionsRaw-$UserEmail.yaml | grep "-" > Permissions-$UserEmail.yaml
+    cat PermissionsRaw-$UserEmail.yaml | grep "-" > Permissions-$UserEmail.yaml
 
     # List the resources that the user can access
     #Create a list and append every resource that you see
