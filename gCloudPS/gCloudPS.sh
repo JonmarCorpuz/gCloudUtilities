@@ -78,11 +78,13 @@ echo "" && echo "pleasework" && echo ""
 while read User;
 do
 
+    Filename="${ProjectID}-${User}.txt"
+
     # Get user email only
     UserEmail=$(echo "${User##* }")
 
     touch $ProjectID-$User.txt
-    echo "User: ${UserEmail}" >> ${ProjectID}-${User}.txt
+    echo "User: ${UserEmail}" >> $Filename.txt
 
     # Fetch user's role
     UserRoleRaw=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity=$UserEmail | grep "role")
@@ -106,11 +108,11 @@ do
     then
         # Predefined Role
         gcloud iam roles describe $Role >> PermissionsRaw-$UserEmail.yaml
-        echo "R O L E  S U M M A R Y" >> ${ProjectID}-${User}.txt
-        echo "" >> ${ProjectID}-${User}.txt
-        echo "Role type: Predefined" >> ${ProjectID}-${User}.txt
-        echo "Role:      ${Role}" >> ${ProjectID}-${User}.txt
-        echo "" >> ${ProjectID}-${User}.txt
+        echo "R O L E  S U M M A R Y" >> $Filename
+        echo "" >> $Filename
+        echo "Role type: Predefined" >> $Filename
+        echo "Role:      ${Role}" >> $Filename
+        echo "" >> $Filename
     else
         # Custom Role
         Remove2="projects/$ProjectID/roles/"
@@ -118,11 +120,11 @@ do
 
         gcloud iam roles describe $Role2 --project $ProjectID >> PermissionsRaw-$UserEmail.yaml
 
-        echo "R O L E  S U M M A R Y" ${ProjectID}-${User}.txt
-        echo "" >> ${ProjectID}-${User}.txt
-        echo "- Role type: Custom" >> ${ProjectID}-${User}.txt
-        echo "- Role:      ${Role}" >> ${ProjectID}-${User}.txt
-        echo "" >> ${ProjectID}-${User}.txt
+        echo "R O L E  S U M M A R Y" $Filename
+        echo "" >> $Filename
+        echo "- Role type: Custom" >> $Filename
+        echo "- Role:      ${Role}" >> $Filename
+        echo "" >> $Filename
     fi
 
     echo "" && echo "3" && echo ""
@@ -156,20 +158,20 @@ do
 
     sed -i '1d;$d' AllowedResources-$UserEmail.txt
 
-    echo "P E R M I S S I O N S  S U M M A R Y" >> ${ProjectID}-${User}.txt
+    echo "P E R M I S S I O N S  S U M M A R Y" >> $Filename
 
-    echo "" >> ${ProjectID}-${User}.txt
-    echo "=== Accessible Resources ===" >> ${ProjectID}-${User}.txt
-    cat AllowedResources-$UserEmail.txt >> ${ProjectID}-${User}.txt
+    echo "" >> $Filename
+    echo "=== Accessible Resources ===" >> $Filename
+    cat AllowedResources-$UserEmail.txt >> $Filename
 
-    echo "" >> ${ProjectID}-${User}.txt
-    echo "=== Permissions ===" >> ${ProjectID}-${User}.txt
-    cat PermissionsRaw-$UserEmail.yaml | grep "-" >> ${ProjectID}-${User}.txt
-    echo "" >> ${ProjectID}-${User}.txt
+    echo "" >> $Filename
+    echo "=== Permissions ===" >> $Filename
+    cat PermissionsRaw-$UserEmail.yaml | grep "-" >> $Filename
+    echo "" >> $Filename
 
-    echo "" >> ${ProjectID}-${User}.txt
-    echo "=================================================================================================" >> ${ProjectID}-${User}.txt
-    echo "" ${ProjectID}-${User}.txt
+    echo "" >> $Filename
+    echo "=================================================================================================" >> $Filename
+    echo "" $Filename
     
 done < Users.txt
 
