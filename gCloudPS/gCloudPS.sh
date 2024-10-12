@@ -101,39 +101,42 @@ do
     # List role's permissions
     if gcloud iam roles describe $Role &> /dev/null;
     then
-        gcloud iam roles describe $Role >> $UserEmail-Permissions.yaml
+        gcloud iam roles describe $Role >> PermissionsRaw-$UserEmail.yaml
     else
         Remove2="projects/$ProjectID/roles/"
         Role2=${UserRole//"$Remove2"/}
 
-        gcloud iam roles describe $Role2 --project $ProjectID >> $UserEmail-Permissions.yaml
+        gcloud iam roles describe $Role2 --project $ProjectID >> PermissionsRaw-$UserEmail.yaml
     fi
 
     echo "" && echo "3" && echo ""
 
-    cat $UserEmail-Permissions.yaml | grep "-" > tmp.txt
+    cat PermissionsRaw-$UserEmail.yaml | grep "-" > Permissions-$UserEmail.yaml
 
     # List the resources that the user can access
     #Create a list and append every resource that you see
 
-    touch tmp2.txt
+    touch AllowedResources-$UserEmail.txt
 
     while read Permission;
     do
 
-    # Split the permission, ex: accessapproval.requests.approve, into three parts and take the first
-    FullPermission=$(echo "${Permission##* }")
-    Resource=$(echo $FullPermission | tr "." "\n" | head -n 1)
+        # Split the permission, ex: accessapproval.requests.approve, into three parts and take the first
+        FullPermission=$(echo "${Permission##* }")
+        Resource=$(echo $FullPermission | tr "." "\n" | head -n 1)
+
+        echo $Resource
 
         # If file doesn't include the resource, add it, else nah
-        if ;
+        if grep -Fxq "${Resource}" AllowedResources-$UserEmail.txt;
         then
-       
+            echo "Already in the list"
         else
-
+            echo "Adding"
+            echo "${Resource}" >> AllowedResources-$UserEmail.txt
         fi
 
-    done < tmp.txt
+    done < Permissions-$UserEmail.yaml
     
 done < Users.txt
 
