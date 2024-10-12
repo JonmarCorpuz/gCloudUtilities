@@ -81,6 +81,9 @@ do
     # Get user email only
     UserEmail=$(echo "${User##* }")
 
+    touch $ProjectID-$User.txt
+    echo "User: ${UserEmail}" >> $ProjectID-$User.txt
+
     # Fetch user's role
     UserRoleRaw=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity=$UserEmail | grep "role")
     UserRole=$(echo "${UserRoleRaw##* }")
@@ -101,12 +104,25 @@ do
     # List role's permissions
     if gcloud iam roles describe $Role &> /dev/null;
     then
+        # Predefined Role
         gcloud iam roles describe $Role >> PermissionsRaw-$UserEmail.yaml
+        echo "R O L E  S U M M A R Y" >> $ProjectID-$User.txt
+        echo "" >> $ProjectID-$User.txt
+        echo "Role type: Predefined" >> $ProjectID-$User.txt
+        echo "Role:      ${Role}" >> $ProjectID-$User.txt
+        echo "" >> $ProjectID-$User.txt
     else
+        # Custom Role
         Remove2="projects/$ProjectID/roles/"
         Role2=${UserRole//"$Remove2"/}
 
         gcloud iam roles describe $Role2 --project $ProjectID >> PermissionsRaw-$UserEmail.yaml
+
+        echo "R O L E  S U M M A R Y" >> $ProjectID-$User.txt
+        echo "" >> $ProjectID-$User.txt
+        echo "- Role type: Custom" >> $ProjectID-$User.txt
+        echo "- Role:      ${Role}" >> $ProjectID-$User.txt
+        echo "" >> $ProjectID-$User.txt
     fi
 
     echo "" && echo "3" && echo ""
@@ -139,10 +155,26 @@ do
     done < Permissions-$UserEmail.yaml
 
     sed -i '1d;$d' AllowedResources-$UserEmail.txt
+
+    echo "P E R M I S S I O N S  S U M M A R Y" >> $ProjectID-$User.txt
+
+    echo "" >> $ProjectID-$User.txt
+    echo "=== Accessible Resources ===" >> $ProjectID-$User.txt
+    cat AllowedResources-$UserEmail.txt >> $ProjectID-$User.txt
+
+    echo "" >> $ProjectID-$User.txt
+    echo "=== Permissions ===" >> $ProjectID-$User.txt
+    cat PermissionsRaw-$UserEmail.yaml | grep "-" >> $ProjectID-$User.txt
+    echo "" >> $ProjectID-$User.txt
+
+    echo "" >> $ProjectID-$User.txt  
+    echo "=================================================================================================" >> gCloudPS-$User.txt 
+    echo "" >> $ProjectID-$User.txt
     
 done < Users.txt
 
-# List the type of access that the user has for each resource they can access using the list generated from the previous step
+# Generate a summarized file for all permissions for all users in this project
+
 
 # Cleanup
 rm Users.txt
