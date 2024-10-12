@@ -56,7 +56,7 @@ mkdir $FolderName
 
 # List all users on the project
 
-gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep user: > Users.txt
+gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "user:" > Users.txt
 
 #echo "" && echo "pleasework" && echo ""
 
@@ -79,7 +79,8 @@ do
 
     echo "" >> ${Filename}.txt
     echo "=== User Information ==========" >> ${Filename}.txt
-    echo "User: ${UserEmail}" >> ${Filename}.txt
+    echo "- User: ${UserEmail}" >> ${Filename}.txt
+    echo "" >> ${Filename}.txt
 
     # Fetch user's role
     UserRoleRaw=$(gcloud asset analyze-iam-policy --project=$ProjectID --identity=$UserEmail | grep "role")
@@ -97,14 +98,14 @@ do
     #echo "" && echo "2" && echo ""
     
     # List role's permissions
-    if gcloud iam roles describe $Role;
+    if gcloud iam roles describe $Role &> /dev/null;
     then
     
         # Predefined Role
         gcloud iam roles describe $Role >> PermissionsRaw-$UserEmail.yaml
-        echo "" >> ${Filename}.txt
-        echo "Role type: Predefined" >> ${Filename}.txt
-        echo "Role:      ${Role}" >> ${Filename}.txt
+        echo "=== Role Summary ==============" >> ${Filename}.txt
+        echo "- Role type: Predefined" >> ${Filename}.txt
+        echo "- Role:      ${Role}" >> ${Filename}.txt
 
     else
     
@@ -114,8 +115,7 @@ do
 
         gcloud iam roles describe $Role2 --project $ProjectID >> PermissionsRaw-$UserEmail.yaml
 
-        echo "=== Role Summary ==============" ${Filename}.txt
-        echo "" >> ${Filename}.txt
+        echo "=== Role Summary ==============" >> ${Filename}.txt
         echo "- Role type: Custom" >> ${Filename}.txt
         echo "- Role:      ${Role}" >> ${Filename}.txt
 
@@ -142,7 +142,7 @@ do
         # If file doesn't include the resource, add it, else nah
         if ! grep -Fxq "${Resource}" AllowedResources-$UserEmail.txt &> /dev/null;
         then
-            echo "${Resource}" >> AllowedResources-$UserEmail.txt
+            echo "- ${Resource}" >> AllowedResources-$UserEmail.txt
         fi
 
     done < Permissions-$UserEmail.yaml
@@ -159,12 +159,13 @@ do
     echo "" >> ${Filename}.txt
 
     mv ${Filename}.txt $FolderName
-    mv Users.txt $FolderName
 
     rm PermissionsRaw-$UserEmail.yaml
     rm Permissions-$UserEmail.yaml
     rm AllowedResources-$UserEmail.txt
 
 done < Users.txt
+
+mv Users.txt $FolderName
 
 # Generate a summarized file for all permissions for all users in this project
