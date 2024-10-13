@@ -186,4 +186,4 @@ do
     echo ""
 done < ServiceAccounts.txt
 
-# gcloud projects get-iam-policy my-project --format=json > ~/policy.json
+gcloud projects get-iam-policy $ProjectID | grep "role:" > Roles.txt
