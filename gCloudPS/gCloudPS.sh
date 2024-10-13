@@ -9,6 +9,10 @@ GREEN="\033[0;32m"
 # Infinte Loop
 ALWAYS_TRUE=true
 
+# Folder Name
+FolderName="PermissionSummary"
+mkdir $FolderName
+
 ######################################### REQUIREMENTS ##########################################
 
 echo '''
@@ -49,10 +53,7 @@ do
     fi
 done
 
-################################### GATHER USER PERMISSIONS #####################################
-
-FolderName="gCloudPS-Output"
-mkdir $FolderName
+######################################## USER ACCOUNTS ##########################################
 
 # List all users on the project
 
@@ -168,4 +169,13 @@ done < Users.txt
 
 mv Users.txt $FolderName
 
-# Generate a summarized file for all permissions for all users in this project
+###################################### SERVICE ACCOUNTS #########################################
+
+gcloud iam service-accounts list --project $ProjectID | grep "EMAIL:" > ServiceAccountsRaw.yaml
+
+while read ServiceAccount;
+do
+
+    echo "${ServiceAccount##* }" >> ServiceAccounts.txt
+    
+done < ServiceAccountsRaw.yaml
