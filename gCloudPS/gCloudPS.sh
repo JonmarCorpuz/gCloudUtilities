@@ -186,4 +186,84 @@ do
     echo ""
 done < ServiceAccounts.txt
 
+### Roles
+
 gcloud projects get-iam-policy $ProjectID | grep "role:" > Roles.txt
+
+while read Role;
+do
+
+    if gcloud iam roles describe $Role &> /dev/null;
+    then
+    
+        # Predefined Role
+        gcloud iam roles describe $Role >> $Role.txt
+        echo "=== Role Summary ==============" >> test123.txt
+        echo "- Role type: Predefined" >> test123.txt
+        echo "- Role:      ${Role}" >> test123.txt
+
+    else
+    
+        # Custom Role
+        Remove2="projects/$ProjectID/roles/"
+        Role2=${Role//"$Remove2"/}
+
+        gcloud iam roles describe $Role2 --project $ProjectID >> $Role.txt
+
+        echo "=== Role Summary ==============" >> test123.txt
+        echo "- Role type: Custom" >> test123.txt
+        echo "- Role:      ${Role}" >> test123.txt
+
+    fi
+
+done < Roles.txt
+
+### Let him cook
+
+gcloud projects get-iam-policy jonmardemoproject | grep "role:" > Roles.txt
+
+sed 's/role: $//' Roles.txt
+
+
+while read Role;
+do
+
+#    Remove123="role:"
+#    tmp=${Role//"Remove123"/}
+
+#    echo $tmp
+
+    test=$(echo "${Role##* }")
+    echo $test
+
+    Remove="projects/jonmardemoproject/"
+    Role1=${test//"$Remove"/}
+
+#    echo $Role1
+
+    if gcloud iam roles describe $Role1 &> /dev/null;
+    then
+    
+        # Predefined Role
+        gcloud iam roles describe $Role1 >> gg123.txt
+#        echo "=== Role Summary ==============" >> test123.txt
+#        echo "- Role type: Predefined" >> test123.txt
+#        echo "- Role:      ${Role}" >> test123.txt
+
+    else
+    
+        # Custom Role
+        Remove2="projects/jonmardemoproject/roles/"
+        Role2=${test//"$Remove2"/}
+
+        echo $Role2
+
+        gcloud iam roles describe $Role2 --project jonmardemoproject >> gg456.txt
+
+#        echo "=== Role Summary ==============" >> test456.txt
+#        echo "- Role type: Custom" >> test456.txt
+#        echo "- Role:      ${Role}" >> test456.txt
+
+    fi
+
+done < Roles.txt
