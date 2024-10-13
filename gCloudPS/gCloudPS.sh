@@ -12,6 +12,8 @@ ALWAYS_TRUE=true
 # Folder Name
 FolderName="PermissionSummary"
 mkdir $FolderName
+mkdir $FolderName/What
+mdkir $FolderName/Who
 
 ######################################### REQUIREMENTS ##########################################
 
@@ -83,7 +85,7 @@ do
         touch ${Role3}.txt
         gcloud iam roles describe $Role1 >> ${Role3}.txt
 
-        mv ${Role3}.txt $FolderName
+        mv ${Role3}.txt $FolderName/What
 
     else
     
@@ -99,17 +101,21 @@ do
         touch ${Role2}.txt
         gcloud iam roles describe $Role2 --project $ProjectID >> ${Role2}.txt
 
-        mv ${Role2}.txt $FolderName
+        mv ${Role2}.txt $FolderName/What
 
     fi
 
 done < Roles.txt
 
+gcloud projects get-iam-policy $ProjectID > IAM-bindings.txt
+
 gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "user:" > Users.txt
 gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "gserviceaccount" > ServiceAccounts.txt
 
-mv Users.txt $FolderName
-mv ServiceAccounts.txt $FolderName
+mv IAM-bindings.txt $FolderName
+mv Users.txt $FolderName/Who
+mv ServiceAccounts.txt $FolderName/Who
+mv Roles.txt $FolderName/What
 
 ######################################## USER ACCOUNTS ##########################################
 
