@@ -185,3 +185,5 @@ do
     gcloud iam service-accounts describe $ServiceAccount --project $ProjectID
     echo ""
 done < ServiceAccounts.txt
+
+# gcloud projects get-iam-policy my-project --format=json > ~/policy.json
