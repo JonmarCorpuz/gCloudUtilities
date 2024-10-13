@@ -13,7 +13,8 @@ ALWAYS_TRUE=true
 FolderName="PermissionSummary"
 mkdir $FolderName
 mkdir $FolderName/What
-mdkir $FolderName/Who
+mkdir $FolderName/Who
+mkdir $FolderName/IAM
 
 ######################################### REQUIREMENTS ##########################################
 
@@ -57,9 +58,9 @@ done
 
 ### Hold up, let him cook
 
-gcloud projects get-iam-policy $ProjectID | grep "role:" > Roles.txt
+gcloud projects get-iam-policy $ProjectID | grep "role:" > IAM-Roles.yaml
 
-sed 's/role: $//' Roles.txt
+sed 's/role: $//' IAM-Roles.yaml
 
 while read Role;
 do
@@ -83,9 +84,9 @@ do
     
         # Predefined Role
         touch ${Role3}.txt
-        gcloud iam roles describe $Role1 >> ${Role3}.txt
+        gcloud iam roles describe $Role1 >> ${Role3}.yaml
 
-        mv ${Role3}.txt $FolderName/What
+        mv ${Role3}.yaml $FolderName/What
 
     else
     
@@ -99,23 +100,27 @@ do
         echo "" && echo $Role2 && echo ""
 
         touch ${Role2}.txt
-        gcloud iam roles describe $Role2 --project $ProjectID >> ${Role2}.txt
+        gcloud iam roles describe $Role2 --project $ProjectID >> ${Role2}.yaml
 
-        mv ${Role2}.txt $FolderName/What
+        mv ${Role2}.yaml $FolderName/What
 
     fi
 
-done < Roles.txt
+done < IAM-Roles.yaml
 
-gcloud projects get-iam-policy $ProjectID > IAM-bindings.txt
+gcloud projects get-iam-policy $ProjectID > IAM-Bindings.yaml
 
-gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "user:" > Users.txt
-gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "gserviceaccount" > ServiceAccounts.txt
+gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "user:" > Users.yaml
+gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "gserviceaccount" > ServiceAccounts.yaml
 
-mv IAM-bindings.txt $FolderName
-mv Users.txt $FolderName
-mv ServiceAccounts.txt $FolderName
-mv Roles.txt $FolderName/What
+mv IAM-Bindings.yaml $FolderName/IAM
+mv Users.yaml $FolderName/Who
+mv ServiceAccounts.yaml $FolderName/Who
+mv IAM-Roles.yaml $FolderName/IAM
+
+touch README.md
+mv README.md $FolderName
+echo "Hold up, let him cook" > $FolderName/README.md
 
 ######################################## USER ACCOUNTS ##########################################
 
