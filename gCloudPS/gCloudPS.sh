@@ -179,3 +179,9 @@ do
     echo "${ServiceAccount##* }" >> ServiceAccounts.txt
     
 done < ServiceAccountsRaw.yaml
+
+while read ServiceAccount;
+do
+    gcloud iam service-accounts describe $ServiceAccount --project $ProjectID
+    echo ""
+done < ServiceAccounts.txt
