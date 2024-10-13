@@ -113,8 +113,8 @@ gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "user:" 
 gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "gserviceaccount" > ServiceAccounts.txt
 
 mv IAM-bindings.txt $FolderName
-mv Users.txt $FolderName/Who
-mv ServiceAccounts.txt $FolderName/Who
+mv Users.txt $FolderName
+mv ServiceAccounts.txt $FolderName
 mv Roles.txt $FolderName/What
 
 ######################################## USER ACCOUNTS ##########################################
