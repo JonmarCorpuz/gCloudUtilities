@@ -14,7 +14,7 @@ FolderName="PermissionSummary"
 mkdir $FolderName
 mkdir $FolderName/What
 mkdir $FolderName/Who
-mkdir $FolderName/IAM
+mkdir $FolderName/RoleBindings
 
 ######################################### REQUIREMENTS ##########################################
 
@@ -56,53 +56,50 @@ do
     fi
 done
 
-### Hold up, let him cook
+###################################### FETCH PERMISSIONS ########################################
 
+echo "" && echo -e "${YELLOW}[WARNING]${WHITE} The script may take a few minutes to run." && echo ""
+
+#
 gcloud projects get-iam-policy $ProjectID | grep "role:" > IAM-Roles.yaml
 
+#
 sed 's/role: $//' IAM-Roles.yaml
 
-while read Role;
+#
+while read FullRolePath;
 do
 
-    test=$(echo "${Role##* }")
-    echo $test
+    tmp=$(echo "${FullRolePath##* }")
 
-    Remove="projects/$ProjectID/"
-    Role1=${test//"$Remove"/}
+    Sanitize1="projects/$ProjectID/"
+    Role=${tmp//"$Sanitize1"/}
 
-    echo "" && echo $Role1 && echo ""
-
-    if gcloud iam roles describe $Role1 &> /dev/null;
+    if gcloud iam roles describe $Role &> /dev/null;
     then
 
-        Remove3="roles/"
-        Role3=${test//"$Remove3"/}
+        Sanitize2="roles/"
+        PredefinedRole=${tmp//"$Sanitize2"/}
 
-        echo "YES"
-        echo "" && echo $Role3 && echo ""
+        echo -e "${YELLOW}[INFO]${WHITE} The following predefined role was found: ${PredefinedRole}"
     
         # Predefined Role
-        touch ${Role3}.txt
-        gcloud iam roles describe $Role1 >> ${Role3}.yaml
+        touch ${PredefinedRole}.yaml
+        gcloud iam roles describe $Role >> ${PredefinedRole}.yaml
 
-        mv ${Role3}.yaml $FolderName/What
+        mv ${PredefinedRole}.yaml $FolderName/What
 
     else
     
-        # Custom Role
-        #Remove2="projects/$ProjectID/roles/"
-        #Role2=${test//"$Remove2"/}
-        Remove2="roles/"
-        Role2=${Role1//"$Remove2"/}
+        Sanitize3="roles/"
+        CustomRole=${Role//"$Sanitize3"/}
 
-        echo "NO"
-        echo "" && echo $Role2 && echo ""
+        echo -e "${YELLOW}[INFO]${WHITE} The following custom role was found: ${CustomRole}" &&
 
-        touch ${Role2}.txt
-        gcloud iam roles describe $Role2 --project $ProjectID >> ${Role2}.yaml
+        touch ${CustomRole}.yaml
+        gcloud iam roles describe $CustomRole --project $ProjectID >> ${CustomRole}.yaml
 
-        mv ${Role2}.yaml $FolderName/What
+        mv ${CustomRole}.yaml $FolderName/What
 
     fi
 
@@ -113,14 +110,17 @@ gcloud projects get-iam-policy $ProjectID > IAM-Bindings.yaml
 gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "user:" > Users.yaml
 gcloud asset search-all-iam-policies --scope=projects/$ProjectID | grep "gserviceaccount" > ServiceAccounts.yaml
 
-mv IAM-Bindings.yaml $FolderName/IAM
+mv IAM-Bindings.yaml $FolderName/RoleBindings
 mv Users.yaml $FolderName/Who
 mv ServiceAccounts.yaml $FolderName/Who
-mv IAM-Roles.yaml $FolderName/IAM
+mv IAM-Roles.yaml $FolderName/RoleBindings
 
 touch README.md
 mv README.md $FolderName
 echo "Hold up, let him cook" > $FolderName/README.md
+
+echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} The permission summary for ${ProjectID} can be found in the PermissionSummary directory." && echo ""
+exit 0
 
 ######################################## USER ACCOUNTS ##########################################
 
