@@ -9,7 +9,11 @@
                                                                          \|_________|
 ```
 
-gCloud Permission Summary summarizes the permissions that a user or service account has
+gCloud Permission Summary summarizes a Google Cloud project's IAM policies.
+
+* Version: 1.0
+
+More description to come, let me cook first.
 
 # References
 
