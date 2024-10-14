@@ -29,15 +29,6 @@ echo '''
                                                                          \|_________|
 '''
 
-######################################## ARGUMENTS CHECK ########################################
-
-# Check if the user provided only the required values when executing the script
-if [ $OPTIND -ne 1 ]; 
-then
-    echo $OPTIND
-    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./gCloudPS.sh -p <PROJECT_ID>" && echo "" &&  exit 1
-fi
-
 ###################################### GATHER USER INPUT ########################################
 
 while [[ $ALWAYS_TRUE=true ]];
