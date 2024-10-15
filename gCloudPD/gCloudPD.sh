@@ -22,7 +22,6 @@ Integer='^[0-9]+$'
 # Project ID
 while [[ $ALWAYS_TRUE=true ]];
 do 
-
     #
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the project ID where you want to create the persistent disk in:) " ProjectID
 
@@ -40,7 +39,6 @@ done
 ## Would you like to attach this Persistent Disk to an existing VM
 while [[ $ALWAYS_TRUE=true ]];
 do 
-
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Would you like to attach this disk to an existing VM in your project? Y or N:) " AttachDisk
 
     if [[ ${AttachDisk,,} == "y" ]];
@@ -50,11 +48,11 @@ do
             read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name of the VM instance that you want to attach this disk to:) " InstanceName
             read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the zone where the VM instance resides in:) " Zone
 
-            if gcloud compute instances describe $InstanceName --zone ${Zone,,};
+            if gcloud compute instances describe $InstanceName --zone ${Zone};
             then
                 break
             else
-                echo -e "${RED}[ERROR 4]${WHITE} An instance called ${Zone,,} was not found in this project." && echo ""
+                echo -e "${RED}[ERROR 4]${WHITE} An instance called ${Zone} was not found in this project." && echo ""
             fi    
         done
         
@@ -62,6 +60,7 @@ do
         
     elif [[ ${AttachDisk,,} == "n" ]];
     then
+    
         while [[ $ALWAYS_TRUE=true ]];
         do 
             read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the zone where you want to create your disk in in:) " Zone
@@ -79,12 +78,10 @@ do
     else
         echo -e "${RED}[ERROR 6]${WHITE} Please enter either Y or N." && echo ""
     fi
-    
 done
 
 while [[ $ALWAYS_TRUE=true ]];
 do 
-
     DiskName="gcloudpd-disk-"${RANDOM:0:2}
 
     if ! gcloud compute disks describe $DiskName --zone $Zone &> /dev/null;
@@ -96,7 +93,6 @@ done
 # Disk Type
 while [[ $ALWAYS_TRUE=true ]];
 do     
-   
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the type of disk that you want to create:) " DiskType
 
     # Create Disk
@@ -106,13 +102,11 @@ do
     else
         echo -e "${RED}[ERROR 7]${WHITE} Please enter a valid persistent disk type." && echo ""
     fi
-
 done
 
 #  Disk Size
 while [[ $ALWAYS_TRUE=true ]];
 do 
-
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter how many gigabytes that you want you disk to have. The minimum disk size is 10 GB:) " DiskSize
 
     # Check if quota has been reached by checking for "Quota 'SSD_TOTAL_GB' exceeded"
@@ -138,7 +132,6 @@ do
     else
         echo -e "${RED}[ERROR 8]${WHITE} Please enter a valid number." && echo ""
     fi
-
 done
 
 echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} A disk called $DiskName was successfully created in $Zone." && echo ""
@@ -154,7 +147,9 @@ then
     echo -e "${GREEN}[SUCCESS]${WHITE} $DiskName was successfully attached to $InstanceName." && echo ""
 fi
 
-# The script worked successfully
+# Cleanup
 rm $DiskName.txt
+
+# The script worked successfully
 echo -e "${GREEN}[SUCCESS]${WHITE} gCloudPD has successfully finished executing." && echo ""
 exit 0
