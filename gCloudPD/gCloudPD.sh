@@ -17,7 +17,7 @@ Integer='^[0-9]+$'
 ######################################### REQUIREMENTS ##########################################
 
 
-###################################### GATHER USER INPUT ########################################
+####################################### GATHER USER INPUT #######################################
 
 # Project ID
 while [[ $ALWAYS_TRUE=true ]];
@@ -37,20 +37,6 @@ do
     fi
 done
 
-#  Disk Size
-while [[ $ALWAYS_TRUE=true ]];
-do 
-    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter how many gigabytes that you want you disk to have (Minimum 10):) " DiskSize
-
-    if [[ $DiskSize =~ $Integer ]];
-    then
-        break
-    else
-        echo -e "${RED}[ERROR 2]${WHITE} Please enter a valid number." && echo ""
-    fi
-
-done
-
 ## Would you like to attach this Persistent Disk to an existing VM
 while [[ $ALWAYS_TRUE=true ]];
 do 
@@ -62,47 +48,93 @@ do
         while [[ $ALWAYS_TRUE=true ]];
         do 
             read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name of the VM instance that you want to attach this disk to:) " InstanceName
-            read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the zone where the VM instance resides in:) " InstanceZone
+            read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the zone where the VM instance resides in:) " Zone
 
-            if gcloud compute instances describe $InstanceName --zone $InstanceZone;
+            if gcloud compute instances describe $InstanceName --zone ${Zone,,};
             then
                 break
             else
-                echo -e "${RED}[ERROR 4]${WHITE} An instance called $InstanceName was not found in this project." && echo ""
+                echo -e "${RED}[ERROR 4]${WHITE} An instance called ${Zone,,} was not found in this project." && echo ""
             fi    
         done
+        
+        break
+        
     elif [[ ${AttachDisk,,} == "n" ]];
     then
+        while [[ $ALWAYS_TRUE=true ]];
+        do 
+            read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the zone where you want to create your disk in in:) " Zone
+
+            if gcloud compute zones describe $Zone &> /dev/null;
+            then
+                break
+            else
+                echo -e "${RED}[ERROR 5]${WHITE} An instance called $Zone was not found in this project." && echo ""
+            fi     
+        done
+
         break
+        
     else
-        echo -e "${RED}[ERROR 3]${WHITE} Please enter either Y or N." && echo ""
+        echo -e "${RED}[ERROR 6]${WHITE} Please enter either Y or N." && echo ""
     fi
     
 done
 
 # Disk Type
-DiskName="demodisk"
 while [[ $ALWAYS_TRUE=true ]];
 do     
    
-    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the persistent disk type that you want this disk to be:) " DiskType
+    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the type of disk that you want to create:) " DiskType
 
     # Create Disk
-    if gcloud compute disks create $DiskName --size $DiskSize --type $DiskType --zone $InstanceZone;
+    if [[ $DiskType == "pd-balanced" ]] || [[ $DiskType == "pd-ssd" ]] || [[ $DiskType == "pd-standard" ]] || [[ $DiskType == "pd-extreme" ]];
     then
         break
     else
-        echo -e "${RED}[ERROR 5]${WHITE} Please enter a valid persistent disk type." && echo ""
+        echo -e "${RED}[ERROR 7]${WHITE} Please enter a valid persistent disk type." && echo ""
     fi
 
 done
 
-## Attach disk to an existing VM if the user wanted to
+#  Disk Size
+DiskName="demodisk"
+while [[ $ALWAYS_TRUE=true ]];
+do 
+
+    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter how many gigabytes that you want you disk to have. The minimum disk size is 10 GB:) " DiskSize
+
+    if [[ $DiskSize =~ $Integer ]];
+    then
+        if [[ $DiskSize -ge 10 ]];
+        then
+            if gcloud compute disks create $DiskName --size $DiskSize --type $DiskType --zone $Zone;
+            then
+                break
+            fi
+        else
+            echo -e "${RED}[ERROR 2]${WHITE} Please enter a value that's at least 10." && echo ""
+        fi
+    else
+        echo -e "${RED}[ERROR 3]${WHITE} Please enter a valid number." && echo ""
+    fi
+
+done
+
+echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} A disk called $DiskName was successfully created in $Zone." && echo ""
+
+# Attach disk to an existing VM if the user wanted to
 if [[ ${AttachDisk,,} == "y" ]];
 then
     gcloud compute instances attach-disk $InstanceName \
-    --disk $DiskName --device-name=$DiskName --zone $InstanceZone
+    --disk $DiskName \
+    --device-name=$DiskName \
+    --zone $InstanceZone
+
+    echo -e "${GREEN}[SUCCESS]${WHITE} $DiskName was successfully attached to $InstanceName." && echo ""
 fi
 
 # The script worked successfully
+echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} gCloudPD has successfully finished executing." && echo ""
 exit 0
