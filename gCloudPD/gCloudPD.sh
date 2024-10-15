@@ -42,13 +42,13 @@ DiskName="gcloudpddisk"
 
 while [[ $ALWAYS_TRUE=true ]];
 do 
-    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter how many gigabytes that you want you disk to have:) " DiskSize
+    read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter how many gigabytes that you want you disk to have (Minimum 10):) " DiskSize
 
     if [[ $DiskSize =~ $Integer ]];
     then
         break
     else
-        echo -e "${RED}[ERROR 1]${WHITE} Please enter a valid number." && echo ""
+        echo -e "${RED}[ERROR 2]${WHITE} Please enter a valid number." && echo ""
     fi
 
 done
@@ -67,7 +67,7 @@ do
     then
         break
     else
-        echo -e "${RED}[ERROR 1]${WHITE} Please enter either Y or N." && echo ""
+        echo -e "${RED}[ERROR 3]${WHITE} Please enter either Y or N." && echo ""
     fi
     
 done
@@ -98,7 +98,7 @@ do
         #gcloud compute disks create $DiskName --size $DiskSize --type $DiskType --zone $InstanceZone
         break
     else
-        echo -e "${RED}[ERROR 1]${WHITE} Please enter a valid persistent disk type." && echo ""
+        echo -e "${RED}[ERROR 5]${WHITE} Please enter a valid persistent disk type." && echo ""
     fi
 
 done
