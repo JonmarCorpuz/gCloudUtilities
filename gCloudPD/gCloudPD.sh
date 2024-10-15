@@ -82,6 +82,17 @@ do
     
 done
 
+while [[ $ALWAYS_TRUE=true ]];
+do 
+
+    DiskName="gcloudpd-disk-"${RANDOM:0:2}
+
+    if ! gcloud compute disks describe $DiskName --zone $Zone &> /dev/null;
+    then
+        break
+    fi 
+done
+
 # Disk Type
 while [[ $ALWAYS_TRUE=true ]];
 do     
@@ -99,25 +110,33 @@ do
 done
 
 #  Disk Size
-DiskName="demodisk"
 while [[ $ALWAYS_TRUE=true ]];
 do 
 
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter how many gigabytes that you want you disk to have. The minimum disk size is 10 GB:) " DiskSize
 
+    # Check if quota has been reached by checking for "Quota 'SSD_TOTAL_GB' exceeded"
+
     if [[ $DiskSize =~ $Integer ]];
     then
         if [[ $DiskSize -ge 10 ]];
         then
-            if gcloud compute disks create $DiskName --size $DiskSize --type $DiskType --zone $Zone;
+            echo ""
+            if gcloud compute disks create $DiskName --size $DiskSize --type $DiskType --zone $Zone &> $DiskName.txt;
             then
                 break
+            elif cat $DiskName.txt | grep -q "Quota 'SSD_TOTAL_GB' exceeded";
+            then
+                echo "" && cat $DiskName.txt 
+                echo "" && echo -e "${RED}[ERROR 2]${WHITE} Quota exceeded." 
+                echo "" && rm $DiskName.txt
+                exit 1
             fi
         else
-            echo -e "${RED}[ERROR 2]${WHITE} Please enter a value that's at least 10." && echo ""
+            echo -e "${RED}[ERROR 3]${WHITE} Please enter a value that's at least 10." && echo ""
         fi
     else
-        echo -e "${RED}[ERROR 3]${WHITE} Please enter a valid number." && echo ""
+        echo -e "${RED}[ERROR 8]${WHITE} Please enter a valid number." && echo ""
     fi
 
 done
@@ -136,5 +155,6 @@ then
 fi
 
 # The script worked successfully
-echo "" && echo -e "${GREEN}[SUCCESS]${WHITE} gCloudPD has successfully finished executing." && echo ""
+rm $DiskName.txt
+echo -e "${GREEN}[SUCCESS]${WHITE} gCloudPD has successfully finished executing." && echo ""
 exit 0
