@@ -58,7 +58,7 @@ do
             read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the name of the VM instance that you want to attach this disk to:) " InstanceName
             read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter the zone where the VM instance resides in:) " Zone
 
-            if gcloud compute instances describe $InstanceName --zone ${Zone};
+            if gcloud compute instances describe $InstanceName --zone $Zone;
             then
                 break
             else
@@ -152,7 +152,7 @@ then
     gcloud compute instances attach-disk $InstanceName \
     --disk $DiskName \
     --device-name=$DiskName \
-    --zone $InstanceZone
+    --zone $Zone
 
     echo -e "${GREEN}[SUCCESS]${WHITE} $DiskName was successfully attached to $InstanceName." && echo ""
 fi
