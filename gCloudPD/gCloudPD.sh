@@ -51,6 +51,7 @@ while [[ $ALWAYS_TRUE=true ]];
 do 
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Would you like to attach this disk to an existing VM in your project? Y or N:) " AttachDisk
 
+    #
     if [[ ${AttachDisk,,} == "y" ]];
     then
         while [[ $ALWAYS_TRUE=true ]];
@@ -67,7 +68,8 @@ do
         done
         
         break
-        
+
+    #    
     elif [[ ${AttachDisk,,} == "n" ]];
     then
     
@@ -90,10 +92,12 @@ do
     fi
 done
 
+#
 while [[ $ALWAYS_TRUE=true ]];
 do 
     DiskName="gcloudpd-disk-"${RANDOM:0:2}
 
+    #
     if ! gcloud compute disks describe $DiskName --zone $Zone &> /dev/null;
     then
         break
@@ -119,16 +123,20 @@ while [[ $ALWAYS_TRUE=true ]];
 do 
     read -p "$(echo -e ${YELLOW}[REQUIRED]${WHITE} Please enter how many gigabytes that you want you disk to have. The minimum disk size is 10 GB:) " DiskSize
 
-    # Check if quota has been reached by checking for "Quota 'SSD_TOTAL_GB' exceeded"
-
+    # 
     if [[ $DiskSize =~ $Integer ]];
     then
+        #
         if [[ $DiskSize -ge 10 ]];
         then
             echo ""
+            
+            #
             if gcloud compute disks create $DiskName --size $DiskSize --type $DiskType --zone $Zone &> $DiskName.txt;
             then
                 break
+
+            #
             elif cat $DiskName.txt | grep -q "Quota 'SSD_TOTAL_GB' exceeded";
             then
                 echo "" && cat $DiskName.txt 
