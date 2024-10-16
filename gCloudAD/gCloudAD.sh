@@ -28,6 +28,10 @@ echo '''
 
 ####################################### GATHER USER INPUT #######################################
 
+
+
+####################################### ACTIVE DIRECTORY ########################################
+
 # Create AD domain
 
 gcloud active-directory domains create <FQDN> \
