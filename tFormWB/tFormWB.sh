@@ -14,15 +14,15 @@ ALWAYS_TRUE=true
 ######################################### REQUIREMENTS ##########################################
 
 echo '''
- _________  _______   ________  ________  ________  ________ ________  ________  _____ ______   ___       __   ________     
-|\___   ___\\  ___ \ |\   __  \|\   __  \|\   __  \|\  _____\\   __  \|\   __  \|\   _ \  _   \|\  \     |\  \|\   __  \    
-\|___ \  \_\ \   __/|\ \  \|\  \ \  \|\  \ \  \|\  \ \  \__/\ \  \|\  \ \  \|\  \ \  \\\__\ \  \ \  \    \ \  \ \  \|\ /_   
-     \ \  \ \ \  \_|/_\ \   _  _\ \   _  _\ \   __  \ \   __\\ \  \\\  \ \   _  _\ \  \\|__| \  \ \  \  __\ \  \ \   __  \  
-      \ \  \ \ \  \_|\ \ \  \\  \\ \  \\  \\ \  \ \  \ \  \_| \ \  \\\  \ \  \\  \\ \  \    \ \  \ \  \|\__\_\  \ \  \|\  \ 
-       \ \__\ \ \_______\ \__\\ _\\ \__\\ _\\ \__\ \__\ \__\   \ \_______\ \__\\ _\\ \__\    \ \__\ \____________\ \_______\
-        \|__|  \|_______|\|__|\|__|\|__|\|__|\|__|\|__|\|__|    \|_______|\|__|\|__|\|__|     \|__|\|____________|\|_______|
-
-TerraformWB is the equivalent of gCloudWB but uses Terraform to create and manage the underlying infrastructure rather than Cloud SDK.
+ _________  ________ ________  ________  _____ ______   ___       __   ________     
+|\___   ___\\  _____\\   __  \|\   __  \|\   _ \  _   \|\  \     |\  \|\   __  \    
+\|___ \  \_\ \  \__/\ \  \|\  \ \  \|\  \ \  \\\__\ \  \ \  \    \ \  \ \  \|\ /_   
+     \ \  \ \ \   __\\ \  \\\  \ \   _  _\ \  \\|__| \  \ \  \  __\ \  \ \   __  \  
+      \ \  \ \ \  \_| \ \  \\\  \ \  \\  \\ \  \    \ \  \ \  \|\__\_\  \ \  \|\  \ 
+       \ \__\ \ \__\   \ \_______\ \__\\ _\\ \__\    \ \__\ \____________\ \_______\
+        \|__|  \|__|    \|_______|\|__|\|__|\|__|     \|__|\|____________|\|_______|
+                                                                                                                                                                  
+tFormWB is the equivalent of gCloudWB but uses Terraform to create and manage the underlying infrastructure rather than Cloud SDK.
 '''
 
 # Check if the user executed the script correctly
@@ -30,9 +30,9 @@ while getopts ":a:" opt; do
     case $opt in
         a) action="$OPTARG"
         ;;
-        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./TerraformWB.sh -a {apply|destroy}" && echo "" &&  exit 1
+        \?) echo -e "${RED}[ERROR 1]${WHITE} Usage: ./tFormWB.sh -a {apply|destroy}" && echo "" &&  exit 1
         ;;
-        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./TerraformWB.sh -a {apply|destroy}" && echo "" && exit 1
+        :) echo -e "${RED}[ERROR 2]${WHITE} Usage: ./tFormWB.sh -a {apply|destroy}" && echo "" && exit 1
         ;;
     esac
 done
@@ -40,7 +40,7 @@ done
 # Check if the user provided only the required values when executing the script
 if [ $OPTIND -ne 3 ]; 
 then
-    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./TerraformWB.sh -a {apply|destroy}" && echo "" &&  exit 1
+    echo -e "${RED}[ERROR 3]${WHITE} Usage: ./tFormWB.sh -a {apply|destroy}" && echo "" &&  exit 1
 fi
 
 echo "${2,,}"
@@ -49,7 +49,7 @@ if [[ ${2,,} == "apply" ]] || [[ ${2,,} == "destroy" ]];
 then 
     echo ""
 else
-    echo -e "${RED}[ERROR 4]${WHITE} Usage: ./TerraformWB.sh -a {apply|destroy}" && echo "" &&  exit 1
+    echo -e "${RED}[ERROR 4]${WHITE} Usage: ./tFormWB.sh -a {apply|destroy}" && echo "" &&  exit 1
 fi
 
 ########################################## TERRAFORM ############################################
