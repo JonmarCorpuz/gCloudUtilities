@@ -15,3 +15,25 @@
     \|_______|    \|__|  \|__|\|_______|\|__|    \|__|  \|__|\|_______|\_________\
                                                                       \|_________|                                                                       
 ```
+
+gCloudUtilities stands for Google Cloud Utilities and serves as a general toolkit for all Google Cloud Platform users that they can use within their Cloud Shell to quickly create and deploy various Google Cloud resources.
+
+# gCloudUtilities Tools
+
+## gCloudAD
+
+## gCloudAN
+
+## gCloudLN
+
+## gCloudMO
+
+## gCloudPD
+
+## gCloudPS
+
+## gCloudWB
+
+## tFormWB
+
+## tShootSSH
