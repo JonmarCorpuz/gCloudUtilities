@@ -27,7 +27,7 @@ create and launch a redundant web application using a simple network architectur
 
 '''
 
-echo -e "${YELLOW}[DISCLAIMER]${WHITE} This script was created for testing purposes and should be used in a production environment." && echo "" 
+echo -e "${YELLOW}[DISCLAIMER]${WHITE} This script was created for testing purposes and should be used in a testing environment." && echo "" 
 echo -e "${YELLOW}[REQUIRED]${WHITE} Don't forget to configure your web server in the StartupScript.sh file found in this repository." && echo ""
 
 ######################################## ARGUMENTS CHECK ########################################
